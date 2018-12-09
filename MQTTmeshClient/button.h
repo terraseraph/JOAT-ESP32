@@ -26,6 +26,8 @@ void button_init() {
   pinMode(BTN_PIN7, INPUT_PULLUP);
   pinMode(BTN_PIN8, INPUT_PULLUP);
   pinMode(BTN_PIN9, INPUT_PULLUP);
+
+  NODE_TYPE = "button";
 }
 
 

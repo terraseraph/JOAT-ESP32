@@ -2,12 +2,14 @@
 // this is a simple example that uses the painlessMesh library
 // 
 // This example shows how to build a mesh with named nodes
-//
+// https://randomnerdtutorials.com/esp32-pinout-reference-gpios/ <- for the things
 //************************************************************
 #include "globals.h"
 #include "namedMesh.h"
+#include "joatKeypad.h"
 #include "relay.h"
 #include "button.h"
+
 
 #define   MESH_SSID       "seraphimMesh"
 #define   MESH_PASSWORD   "midgar69"
@@ -23,7 +25,7 @@ String inputString = "";
 
 //send heartbeat every 30 seconds
 Task taskSendMessage( TASK_SECOND*30, TASK_FOREVER, []() {
-    String msg = String("Heartbeat ") + nodeName + String(" Alive");
+    String msg = String("Heartbeat ") + MY_ID + String(" Alive, Type: " + NODE_TYPE);
     mesh.sendSingle(BRIDGE_ID, msg);
     mesh.sendBroadcast(msg);
 }); // start with a one second interval
@@ -58,7 +60,8 @@ void setup() {
 
 //Init node type
 //  relay_init();
-  button_init();
+//  button_init();
+  keypad_init();
 }
 
 void parseReceivedPacket(String msg){
@@ -74,7 +77,7 @@ void parseReceivedPacket(String msg){
   }
 }
 
-
+//Command to change the node type
 void parseCommand(JsonObject &root){
   if(root["command"] == "setBridgeId"){
     uint32_t id = root["bridgeId"];
@@ -86,6 +89,9 @@ void parseCommand(JsonObject &root){
   if(root["command"] == "useRelay"){
     relay_init();
   }
+  if(root["command"] == "useKeypad"){
+    keypad_init();
+  }  
 }
 
 void loop() {
@@ -95,7 +101,12 @@ void loop() {
 
   //Events
   serialEvent();
-  processButtonEvent();
+  processEventLoop();
+}
+
+void processEventLoop(){
+  if(NODE_TYPE == "button"){ processButtonEvent(); };
+  if(NODE_TYPE == "keypad"){ ProcessKeyPad(); };
 }
 
 void serialEvent() {

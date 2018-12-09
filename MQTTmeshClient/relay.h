@@ -51,6 +51,8 @@ void relay_init() {
 
   pinMode(REL_PIN8, INPUT_PULLUP);
   pinMode(REL_PIN8, OUTPUT);
+
+  NODE_TYPE = "relay";
 }
 
 void relayToggleOn(){
