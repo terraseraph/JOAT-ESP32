@@ -29,6 +29,7 @@ void magSwitch_init() {
   pinMode(MAG_PIN9, INPUT_PULLUP);
 
   NODE_TYPE = "magSwitch";
+  
 }
 
 

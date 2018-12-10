@@ -53,6 +53,7 @@ void keypad_init() {
   Serial.println("Keypad Init");
   _keypad = new Keypad(makeKeymap(keypadKeys), KEYPAD_ROW_PINS, KEYPAD_COL_PINS, KEYPAD_ROWS, KEYPAD_COLS);
   NODE_TYPE = "keypad";
+  
   memset(keypad_digits, 0, sizeof(keypad_digits));
 }
 

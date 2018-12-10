@@ -3,6 +3,7 @@
 // 
 //************************************************************
 #include "globals.h"
+#include "joatEEPROM.h"
 #include "namedMesh.h"
 #include "joatKeypad.h"
 #include "relay.h"
@@ -58,10 +59,21 @@ void setup() {
   taskSendMessage.enable();
 
 //Init node type
+  
 //  relay_init();
 //  button_init();
 //  keypad_init();
-  magSwitch_init();
+//  magSwitch_init();
+  startupInitType();
+}
+
+void startupInitType(){
+  NODE_TYPE = getNodeType();
+  if(NODE_TYPE == "relay") {relay_init();};
+  if(NODE_TYPE == "button") {button_init();};
+  if(NODE_TYPE == "keypad") {keypad_init();};
+  if(NODE_TYPE == "magSwitch") {magSwitch_init();};
+  Serial.println("======  Using " + NODE_TYPE + " =====");
 }
 
 void parseReceivedPacket(String msg){
@@ -85,15 +97,23 @@ void parseCommand(JsonObject &root){
   }
   if(root["command"] == "useButton"){
     button_init();
+    setNodeType("button");
+    ESP.restart();
   }
   if(root["command"] == "useRelay"){
     relay_init();
+    setNodeType("relay");
+    ESP.restart();
   }
   if(root["command"] == "useKeypad"){
     keypad_init();
+    setNodeType("keypad");
+    ESP.restart();
   }
   if(root["command"] == "useMagSwitch"){
     magSwitch_init();
+    setNodeType("magSwitch");
+    ESP.restart();
   }    
 }
 

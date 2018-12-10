@@ -53,6 +53,7 @@ void relay_init() {
   pinMode(REL_PIN8, OUTPUT);
 
   NODE_TYPE = "relay";
+  setNodeType("relay");
 }
 
 void relayToggleOn(){
@@ -99,4 +100,3 @@ void processRelayAction(String action, int pinNo){
     Serial.printf("Relay toggle");
   }
 }
-

@@ -170,7 +170,7 @@ void forwardEventActionPacket(JsonObject &root)
 }
 
 void receivedCallback( const uint32_t &from, const String &msg ) {
-  Serial.printf("bridge: Received from %u msg=%s\n", from, msg.c_str()); //Remove this later
+//  Serial.printf("bridge: Received from %u msg=%s\n", from, msg.c_str()); //Remove this later
   String topic = "painlessMesh/from/" + String(from);
   mqttClient.publish(topic.c_str(), msg.c_str());
   Serial.println(msg.c_str());
