@@ -14,11 +14,11 @@
 #include <WiFiClient.h>
 
 #define   MESH_PREFIX     "seraphimMesh"
-#define   MESH_PASSWORD   "midgar69"
+#define   MESH_PASSWORD   "somepassword"
 #define   MESH_PORT       5555
 
 #define   STATION_SSID     "NFC"
-#define   STATION_PASSWORD "midgar69"
+#define   STATION_PASSWORD "somepassword"
 
 #define HOSTNAME "MQTT_Bridge"
 #define BRIDGE // to use when files are combined
