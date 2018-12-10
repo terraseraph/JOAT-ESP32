@@ -11,7 +11,7 @@
 
 
 #define   MESH_SSID       "seraphimMesh"
-#define   MESH_PASSWORD   "midgar69"
+#define   MESH_PASSWORD   "somepassword"
 #define   MESH_PORT       5555
 
 
