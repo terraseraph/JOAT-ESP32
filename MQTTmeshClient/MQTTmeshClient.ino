@@ -80,7 +80,7 @@ void parseReceivedPacket(String msg){
   DynamicJsonBuffer jsonBuffer;
   JsonObject& root = jsonBuffer.parseObject(msg);
   if(root.success()){
-    if (root.containsKey("command")) {
+    if (root.containsKey("command") && root["toId"] == MY_ID) {
       parseCommand(root); 
     }
     else{
@@ -96,22 +96,22 @@ void parseCommand(JsonObject &root){
     BRIDGE_ID = id;
   }
   if(root["command"] == "useButton"){
-    button_init();
+//    button_init();
     setNodeType("button");
     ESP.restart();
   }
   if(root["command"] == "useRelay"){
-    relay_init();
+//    relay_init();
     setNodeType("relay");
     ESP.restart();
   }
   if(root["command"] == "useKeypad"){
-    keypad_init();
+//    keypad_init();
     setNodeType("keypad");
     ESP.restart();
   }
   if(root["command"] == "useMagSwitch"){
-    magSwitch_init();
+//    magSwitch_init();
     setNodeType("magSwitch");
     ESP.restart();
   }    
