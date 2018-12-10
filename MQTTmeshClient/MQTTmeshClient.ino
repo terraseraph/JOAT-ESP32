@@ -1,14 +1,13 @@
 //************************************************************
-// this is a simple example that uses the painlessMesh library
+// https://randomnerdtutorials.com/esp32-pinout-reference-gpios/ <- for the pins
 // 
-// This example shows how to build a mesh with named nodes
-// https://randomnerdtutorials.com/esp32-pinout-reference-gpios/ <- for the things
 //************************************************************
 #include "globals.h"
 #include "namedMesh.h"
 #include "joatKeypad.h"
 #include "relay.h"
 #include "button.h"
+#include "magSwitch.h"
 
 
 #define   MESH_SSID       "seraphimMesh"
@@ -61,7 +60,8 @@ void setup() {
 //Init node type
 //  relay_init();
 //  button_init();
-  keypad_init();
+//  keypad_init();
+  magSwitch_init();
 }
 
 void parseReceivedPacket(String msg){
@@ -91,8 +91,12 @@ void parseCommand(JsonObject &root){
   }
   if(root["command"] == "useKeypad"){
     keypad_init();
-  }  
+  }
+  if(root["command"] == "useMagSwitch"){
+    magSwitch_init();
+  }    
 }
+
 
 void loop() {
   userScheduler.execute(); // it will run mesh scheduler as well
@@ -107,6 +111,7 @@ void loop() {
 void processEventLoop(){
   if(NODE_TYPE == "button"){ processButtonEvent(); };
   if(NODE_TYPE == "keypad"){ ProcessKeyPad(); };
+  if(NODE_TYPE == "magSwitch"){processMagSwitchEvent();};
 }
 
 void serialEvent() {
@@ -144,8 +149,10 @@ void parseEventActionPacket(JsonObject &root){
     const char *eventType = root["eventType"];
     String action = root["action"];
     String actionType = root["actionType"];
-//    String data = root["data"];
+
+    //Switch data type depending on action to be completed
     if(toId != MY_ID){Serial.printf("Not for me"); return;}
+    
     if(actionType == "relay"){
       Serial.println("Packet for me");
       int data = root["data"];
