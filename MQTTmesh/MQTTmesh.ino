@@ -117,7 +117,7 @@ void preparePacketForMesh( uint32_t from, String &msg ) {
   JsonObject& root = jsonBuffer.parseObject(msg);
 //  uint32_t target = root["toId"];
   if(root.success()){
-    if (root.containsKey("command")) {
+    if (root.containsKey("command") && root.containsKey("toId")) {
       parseCommand(root); 
     }
     if (root.containsKey("toId")) {
@@ -138,6 +138,11 @@ void preparePacketForMesh( uint32_t from, String &msg ) {
 void parseCommand(JsonObject &root){
   if(root["command"] == "getTopo"){
       Serial.print(mesh.subConnectionJson());
+  }
+  else{
+    String buffer;
+    root.printTo(buffer);
+    mesh.sendBroadcast(buffer);
   }
 }
 
