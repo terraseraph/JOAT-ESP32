@@ -3,6 +3,7 @@
         {
             "name": "Win32",
             "includePath": [
+                "C:\\Users\\HERMES\\Documents\\Arduino\\hardware\\espressif\\esp32\\**",
                 "C:\\Users\\HERMES\\AppData\\Local\\Arduino15\\packages\\esp8266\\tools\\**",
                 "C:\\Users\\HERMES\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.4.2\\**",
                 "C:\\Users\\HERMES\\AppData\\Local\\Arduino15\\packages\\esp32\\tools\\**",
