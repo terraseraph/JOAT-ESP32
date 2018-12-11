@@ -32,11 +32,13 @@ void setNodeType(String type) {
   };
   Serial.print("====== Setting " + type + " type =====");
   Serial.println(val);
+  EEPROM.begin(EEPROM_SIZE); 
   EEPROM.writeInt(0, val);
   EEPROM.commit();
 }
 
 String getNodeType() {
+  EEPROM.begin(EEPROM_SIZE);
 //  if (!EEPROM.begin(EEPROM.length())) {
 //    Serial.println("Failed to initialise EEPROM");
 //    Serial.println("Restarting...");
