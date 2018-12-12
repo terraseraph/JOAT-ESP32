@@ -198,7 +198,7 @@ void parseEventActionPacket(JsonObject &root) {
 }
 
 void createJsonPacket(String fromId, String event, String eventType, String action, String actionType, String data) {
-  StaticJsonBuffer<200> jsonBuffer;
+  DynamicJsonBuffer jsonBuffer;
   JsonObject& object = jsonBuffer.createObject();
   object["toId"] = "master";
   object["fromId"] = fromId;
@@ -209,5 +209,6 @@ void createJsonPacket(String fromId, String event, String eventType, String acti
   object["data"] = data;
   String buffer;
   object.printTo(buffer);
+  Serial.println(buffer);
   mesh.sendBroadcast(buffer);
 }

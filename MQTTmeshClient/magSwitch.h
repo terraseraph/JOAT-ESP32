@@ -74,7 +74,6 @@ void processMagSwitchEvent() {
         SWITCH_STATE[9] = magnet9 == LOW;
 
         int int_data[10] = {0};
-        String str_data = intToStringArray(int_data, 10);
         //prepare packet for magnet
         if (magnet0 == LOW) int_data[0] = 1;
         if (magnet1 == LOW) int_data[1] = 1;
@@ -86,6 +85,8 @@ void processMagSwitchEvent() {
         if (magnet7 == LOW) int_data[7] = 1;
         if (magnet8 == LOW) int_data[8] = 1;
         if (magnet9 == LOW) int_data[9] = 1;
+        String str_data = intToStringArray(int_data, 10);
+        // Serial.println(str_data);
         createJsonPacket(MY_ID, "toggle", "magnetSwitch", "noneA", "noneAT", str_data);
     }
   }
