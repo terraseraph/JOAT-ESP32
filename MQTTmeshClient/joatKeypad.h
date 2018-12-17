@@ -61,7 +61,7 @@ void keypad_init() {
 bool ProcessKeyPad()
 {
   char key = _keypad->getKey();
-  if (key != NULL) {
+  if (key) {
     keypad_digits[digit_count] = key;
     Serial.print("Key Pad digit buffer: ");
     Serial.println((char*) keypad_digits);

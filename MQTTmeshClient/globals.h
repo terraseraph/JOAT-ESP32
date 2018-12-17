@@ -1,3 +1,4 @@
+#define ARDUINOJSON_ENABLE_PROGMEM 0
 //Global vars
 int GLOBAL_PIN;
 String nodeName = "logNode"; // Name needs to be unique

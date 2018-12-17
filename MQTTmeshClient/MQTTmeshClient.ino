@@ -27,7 +27,7 @@ String inputString = "";
 Task taskSendMessage( TASK_SECOND * 30, TASK_FOREVER, []() {
   String msg = String("Heartbeat ") + MY_ID + String(" Alive, Type: " + NODE_TYPE);
   mesh.sendSingle(BRIDGE_ID, msg);
-  mesh.sendBroadcast(msg);
+//  mesh.sendBroadcast(msg);
 }); // start with a one second interval
 
 
@@ -85,8 +85,12 @@ void startupInitType() {
 }
 
 void parseReceivedPacket(String msg) {
+  char cMsg[msg.length()+1];
+  msg.toCharArray(cMsg, sizeof(cMsg));
+  Serial.println(cMsg);
+  
   DynamicJsonBuffer jsonBuffer;
-  JsonObject& root = jsonBuffer.parseObject(msg);
+  JsonObject& root = jsonBuffer.parseObject(cMsg);
   if (root.success()) {
     if (root.containsKey("command") && root["toId"] == MY_ID) {
       parseCommand(root);
@@ -102,6 +106,7 @@ void parseCommand(JsonObject &root) {
   if (root["command"] == "setBridgeId") {
     uint32_t id = root["bridgeId"];
     BRIDGE_ID = id;
+    return;
   }
   if (root["command"] == "useButton") {
     //    button_init();
