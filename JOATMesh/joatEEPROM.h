@@ -3,6 +3,9 @@
 int addr = 0;
 #define EEPROM_SIZE 64
 
+EEPROMClass  EENODEID("eeprom0", 0x1000);
+EEPROMClass  EENODETYPE("eeprom1", 0x500);
+
 #define TYPE_BRIDGE 0
 #define TYPE_RELAY 1
 #define TYPE_BUTTON 2
@@ -14,6 +17,19 @@ int addr = 0;
 //  keypad,
 //  magSwitch
 //}
+void setNodeId(String val){
+  Serial.print("====== Setting " + val + " Node ID =====");
+  Serial.println(val);
+  EENODEID.begin(EENODEID.length());
+  EENODEID.writeString(0, val);
+  EENODEID.commit();
+}
+
+String getNodeId() {
+  EENODEID.begin(EENODEID.length());
+  String type = (EENODEID.readString(0));  
+  return type;
+}
 
 void setNodeType(String type) {
   //  NodeType nt;
@@ -42,8 +58,8 @@ void setNodeType(String type) {
 }
 
 String getNodeType() {
-  EEPROM.begin(EEPROM_SIZE);
-  int type = (byte(EEPROM.readInt(0)));
+  EENODETYPE.begin(EENODETYPE.length());
+  int type = (byte(EENODETYPE.readInt(0)));
   //  NodeType nt;
   //  nt = type;
   String nt;
