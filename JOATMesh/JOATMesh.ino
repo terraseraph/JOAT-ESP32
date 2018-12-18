@@ -29,6 +29,7 @@
 
 #define HOSTNAME "MQTT_Bridge"
 #define BRIDGE // to use when files are combined
+uint32_t BRIDGE_ID;
 
 //Create list of all connected nodes and names
 DynamicJsonBuffer jsonNodeListBuffer;
