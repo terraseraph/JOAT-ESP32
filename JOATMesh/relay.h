@@ -15,19 +15,17 @@
 void relayToggleOff();
 void relayToggleOn();
 
-
 Scheduler relayScheduler;
 Task toggleOn(TOGGLE_DELAY, 1, &relayToggleOn);
 Task toggleOff(TOGGLE_DELAY, 1, &relayToggleOff);
 
-void relay_init() {
+void relay_init()
+{
 
-
-  
   relayScheduler.init();
   relayScheduler.addTask(toggleOn);
   relayScheduler.addTask(toggleOff);
-  
+
   pinMode(REL_PIN1, INPUT_PULLUP);
   pinMode(REL_PIN1, OUTPUT);
 
@@ -56,47 +54,53 @@ void relay_init() {
   setNodeType("relay");
 }
 
-void relayToggleOn(){
+void relayToggleOn()
+{
   int pinNo = GLOBAL_PIN;
   digitalWrite(pinNo, HIGH);
   Serial.print(pinNo);
   Serial.println(": Relay toggle on");
 }
 
-void relayToggleOff(){
+void relayToggleOff()
+{
   int pinNo = GLOBAL_PIN;
   digitalWrite(pinNo, LOW);
   Serial.print(pinNo);
   Serial.println(": Relay toggle off");
 }
 
-
-void processRelayAction(String action, int pinNo){
+void processRelayAction(String action, int pinNo)
+{
   GLOBAL_PIN = pinNo;
 
-  
-  if(action == "start"){
+  if (action == "start")
+  {
     digitalWrite(pinNo, HIGH);
     Serial.print(pinNo);
     Serial.println(": Relay on");
   }
-  if(action == "stop"){
+  if (action == "stop")
+  {
     digitalWrite(pinNo, LOW);
     Serial.print(pinNo);
     Serial.printf(": Relay off");
   }
-  if(action == "toggle"){
-    if(digitalRead(pinNo) == HIGH){
-      digitalWrite(pinNo, LOW); 
+  if (action == "toggleA")
+  {
+    if (digitalRead(pinNo) == HIGH)
+    {
+      digitalWrite(pinNo, LOW);
       toggleOn.setIterations(1); //ensures the task re runs
       toggleOn.enable();
     }
-    else{
+    else
+    {
       digitalWrite(pinNo, HIGH);
       toggleOff.setIterations(1);
       toggleOff.enable();
     }
-    
+
     Serial.printf("Relay toggle");
   }
 }
