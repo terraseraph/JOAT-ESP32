@@ -1,0 +1,4 @@
+To make json packets for the mesh : https://arduinojson.org/v5/assistant/
+Must use the esp32 stable release 1.0.0 :https://github.com/espressif/arduino-esp32/releases/tag/1.0.0
+    If using git pull (get.exe), just reset --hard on 2fba81223e3a2779e4e15cb184df3ed59652f92a
+    
