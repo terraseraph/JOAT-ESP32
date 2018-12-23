@@ -2,6 +2,13 @@
 // Got info from:
 // https://www.instructables.com/id/ESP32-With-RFID-Access-Control/
 // This header controls the RFID functionality
+// SDA - 21
+// SCK - 18
+// MOS - 23
+// MIS - 19
+// RST - 22
+// gnd
+// 3v3
 //==========================================
 
 #include <MFRC522.h> //library responsible for communicating with the module RFID-RC522
