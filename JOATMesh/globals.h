@@ -14,9 +14,10 @@ uint32_t BRIDGE_ID;
 
 int GLOBAL_PIN;
 String nodeName = "logNode"; // Name needs to be unique
-String MY_ID = "11";
+String MY_ID = "1";
 String NODE_TYPE;
 bool MQTT_ENABLED = true;
 
 //Prototypes
 void createJsonPacket(String fromId, String event, String eventType, String action, String actionType, String data);
+void printNodeList();

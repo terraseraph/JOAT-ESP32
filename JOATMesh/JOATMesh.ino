@@ -46,6 +46,12 @@ Task taskHeartbeat(TASK_SECOND * 30, TASK_FOREVER, []() {
   //  mesh.sendBroadcast(msg);
 });
 
+//==============================//
+//===== Node list print =======//
+//============================//
+Scheduler nodeListScheduler;
+Task printNodeListTask(TASK_SECOND * 60, TASK_FOREVER, &printNodeList);
+
 void setup()
 {
   Serial.begin(115200);
@@ -108,6 +114,8 @@ void startupInitType()
   if (NODE_TYPE == "bridge")
   {
     bridge_init();
+    nodeListScheduler.init();
+    nodeListScheduler.addTask(printNodeListTask);
   };
   Serial.println("======  Using " + NODE_TYPE + " =====");
 }
@@ -142,6 +150,10 @@ void processEventLoop()
   {
     scheduler.execute();
   }
+  if (NODE_TYPE == "bridge") //if it is the bridge
+  {
+    nodeListScheduler.execute();
+  }
 }
 
 //==============================//
@@ -174,9 +186,17 @@ void addNodeToList(uint32_t nodeId, String myId, String nodeType)
     nodeList[nodeMeshId]["id"] = myId;
     nodeList[nodeMeshId]["type"] = nodeType;
   }
+}
+
+void printNodeList()
+{
   String list;
   nodeList.printTo(list);
-  Serial.println("=======" + list + "=============");
+  // nodeList.prettyPrintTo(list);
+  Serial.println("============= Nodes ==========");
+  Serial.println("{\"nodes\":[ " + list + "]}");
+  Serial.print("Free memory: ");
+  Serial.println(ESP.getFreeHeap());
 }
 
 void removeNodeFromList(String nodeName)
@@ -239,7 +259,7 @@ void preparePacketForMesh(uint32_t from, String &msg)
   {
     if (root.containsKey("command") && root.containsKey("toId"))
     {
-      if (root["toId"] == MY_ID || root["toId"] == mesh.getNodeId())
+      if (root["toId"] == MY_ID || root["toId"] == String(mesh.getNodeId()))
       {
         parseCommand(root);
       }
@@ -387,6 +407,10 @@ void parseCommand(JsonObject &root)
   {
     setNodeType("rfid");
     ESP.restart();
+  }
+  if (root["command"] == "getMeshNodes")
+  {
+    printNodeList();
   }
 }
 
