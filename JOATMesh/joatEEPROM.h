@@ -11,6 +11,7 @@ EEPROMClass EENODETYPE("eeprom1", 0x500);
 #define TYPE_BUTTON 2
 #define TYPE_KEYPAD 3
 #define TYPE_MAGSWITCH 4
+#define TYPE_RFID 5
 #define TYPE_UNSET 255
 //enum NodeType {
 //  relay,
@@ -56,6 +57,10 @@ void setNodeType(String type)
   {
     val = TYPE_MAGSWITCH;
   };
+  if (type == "rfid")
+  {
+    val = TYPE_RFID;
+  };
   if (type == "bridge")
   {
     val = TYPE_BRIDGE;
@@ -93,6 +98,10 @@ String getNodeType()
   if (type == TYPE_MAGSWITCH)
   {
     nt = "magSwitch";
+  };
+  if (type == TYPE_RFID)
+  {
+    nt = "rfid";
   };
   if (type == TYPE_BRIDGE)
   {

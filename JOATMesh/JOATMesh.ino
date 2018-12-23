@@ -16,6 +16,7 @@
 #include "relay.h"
 #include "button.h"
 #include "magSwitch.h"
+#include "rfid.h"
 
 // Prototypes
 // void receivedCallback(uint32_t &from, String &msg);
@@ -100,6 +101,10 @@ void startupInitType()
   {
     magSwitch_init();
   };
+  if (NODE_TYPE == "rfid")
+  {
+    rfid_init();
+  };
   if (NODE_TYPE == "bridge")
   {
     bridge_init();
@@ -127,6 +132,11 @@ void processEventLoop()
   if (NODE_TYPE == "relay")
   {
     relayScheduler.execute(); //for relay delays
+  };
+  if (NODE_TYPE == "rfid")
+  {
+    rdidScheduler.execute(); //for relay delays
+    processRfid();
   };
   if (NODE_TYPE != "bridge") //run heartbeat if not the bridge
   {
@@ -371,6 +381,11 @@ void parseCommand(JsonObject &root)
   {
     //    magSwitch_init();
     setNodeType("magSwitch");
+    ESP.restart();
+  }
+  if (root["command"] == "useRfid")
+  {
+    setNodeType("rfid");
     ESP.restart();
   }
 }

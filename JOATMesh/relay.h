@@ -10,14 +10,14 @@
 #define REL_PIN7 27
 #define REL_PIN8 14
 
-#define TOGGLE_DELAY 100
+#define RELAY_TOGGLE_DELAY 100
 
 void relayToggleOff();
 void relayToggleOn();
 
 Scheduler relayScheduler;
-Task toggleOn(TOGGLE_DELAY, 1, &relayToggleOn);
-Task toggleOff(TOGGLE_DELAY, 1, &relayToggleOff);
+Task toggleOn(RELAY_TOGGLE_DELAY, 1, &relayToggleOn);
+Task toggleOff(RELAY_TOGGLE_DELAY, 1, &relayToggleOff);
 
 void relay_init()
 {
