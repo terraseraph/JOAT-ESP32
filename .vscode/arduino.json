@@ -2,7 +2,7 @@
   "board": "espressif:esp32:esp32",
   "configuration": "PSRAM=disabled,PartitionScheme=default,FlashMode=qio,FlashFreq=80,FlashSize=4M,UploadSpeed=921600,DebugLevel=none",
   "programmer": "AVRISP mkII",
-  "port": "COM11",
+  "port": "COM4",
   "sketch": "JOATMesh\\JOATMesh.ino",
   "output": "../ESPbuild"
 }
