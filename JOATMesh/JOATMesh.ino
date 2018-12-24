@@ -1,8 +1,12 @@
 //************************************************************
 // Switch between being a bridge devie or just a mesh node
 // Example commands to send via mesh or serial.
-// {"command" : "useMagSwitch", "toId" : "10"}
-// {"command" : "setId", "toId" : "10", "nodeId" : "11"} (toId also mesh id)
+// {"command" : "useMagSwitch", "toId" : "10"} -- tells device 10 to use mag switch
+// {"command" : "getMeshNodes", "toId":"1"} -- Gets all mesh nodes and prints fre memory
+// {"command" : "setId", "toId" : "10", "nodeId" : "11"} (toId also hardware id) -- sets the easy id
+// {"toId": "11", "wait": "0", "event":"noneE", "eventType":"noneET", "action":"start", "actionType":"relay", "data":"1"} -- example action
+// {"toId":"3213429781","fromId":"10","event":"code","eventType":"keypad","action":"noneA", "actionType" : "noneAT", "data" : "333333"} -- example event
+//
 // https://randomnerdtutorials.com/esp32-pinout-reference-gpios/ <- for the pins
 //************************************************************
 
@@ -39,7 +43,8 @@ String inputString = ""; //for serial input
 Scheduler scheduler;
 Task taskHeartbeat(TASK_SECOND * 30, TASK_FOREVER, []() {
   String hwId = String(mesh.getNodeId());
-  String msg = "{\"heartbeat\":{\"hardwareId\":" + hwId + ",\"id\":\"" + MY_ID + "\",\"type\":\"" + NODE_TYPE + "\"}}";
+  String mem = String(ESP.getFreeHeap());
+  String msg = "{\"heartbeat\":{\"hardwareId\":" + hwId + ",\"id\":\"" + MY_ID + "\",\"type\":\"" + NODE_TYPE + "\",\"memory\":\"" + mem + "\"}}";
   Serial.println("====Sending heartbeat to: " + hwId + "=====");
   Serial.println(msg);
   mesh.sendSingle(BRIDGE_ID, msg);
@@ -116,6 +121,7 @@ void startupInitType()
     bridge_init();
     nodeListScheduler.init();
     nodeListScheduler.addTask(printNodeListTask);
+    printNodeListTask.enable();
   };
   Serial.println("======  Using " + NODE_TYPE + " =====");
 }
@@ -172,7 +178,7 @@ void bridge_init()
 DynamicJsonBuffer jsonNodeListBuffer;
 JsonObject &nodeList = jsonNodeListBuffer.createObject();
 
-void addNodeToList(uint32_t nodeId, String myId, String nodeType)
+void addNodeToList(uint32_t nodeId, String myId, String nodeType, string memory)
 {
   String nodeMeshId = String(nodeId); //convert node name to string
   if (!nodeList.containsKey(nodeMeshId))
@@ -180,11 +186,13 @@ void addNodeToList(uint32_t nodeId, String myId, String nodeType)
     JsonObject &nodeObj = nodeList.createNestedObject(nodeMeshId);
     nodeObj["id"] = myId;
     nodeObj["type"] = nodeType;
+    nodeObj["memory"] = memory;
   }
   else
   {
     nodeList[nodeMeshId]["id"] = myId;
     nodeList[nodeMeshId]["type"] = nodeType;
+    nodeList[nodeMeshId]["memory"] = memory;
   }
 }
 
@@ -195,8 +203,8 @@ void printNodeList()
   // nodeList.prettyPrintTo(list);
   Serial.println("============= Nodes ==========");
   Serial.println("{\"nodes\":[ " + list + "]}");
-  Serial.print("Free memory: ");
-  Serial.println(ESP.getFreeHeap());
+  String mem = String(ESP.getFreeHeap());
+  Serial.println("{\"memory\":" + mem + "}");
 }
 
 void removeNodeFromList(String nodeName)
@@ -232,11 +240,10 @@ void serialEvent()
   while (Serial.available())
   {
     char inChar = (char)Serial.read();
-    Serial.print(inChar);
+    // Serial.print(inChar);
     inputString += inChar;
     if (inChar == '\n')
     {
-      Serial.println(inputString);
       preparePacketForMesh(mesh.getNodeId(), inputString);
       inputString = "";
       Serial.println("{\"ready\":\"true\"}"); //tells the server we are ready for another message
@@ -254,6 +261,8 @@ void preparePacketForMesh(uint32_t from, String &msg)
   Serial.println("Perparing packet");
   DynamicJsonBuffer jsonBuffer;
   JsonObject &root = jsonBuffer.parseObject(msg);
+  String buffer;
+  root.printTo(buffer);
   //  uint32_t target = root["toId"];
   if (root.success())
   {
@@ -265,8 +274,6 @@ void preparePacketForMesh(uint32_t from, String &msg)
       }
       else //broadcast command to the mesh
       {
-        String buffer;
-        root.printTo(buffer);
         mesh.sendBroadcast(buffer);
       }
     }
@@ -276,8 +283,6 @@ void preparePacketForMesh(uint32_t from, String &msg)
     }
     else //just send it anyway......
     {
-      String buffer;
-      root.printTo(buffer);
       mesh.sendBroadcast(buffer);
     }
   }
@@ -305,7 +310,6 @@ void forwardEventActionPacket(JsonObject &root)
   const char *data = root["data"];
   String buffer;
   root.printTo(buffer);
-  Serial.print(buffer);
   mesh.sendBroadcast(buffer); //TODO: change to sendSingle()
 #ifdef DEV_DEBUG
   /* for debugging messages */
@@ -333,10 +337,6 @@ void receivedCallback(uint32_t from, String &msg)
 //============================//
 void parseReceivedPacket(uint32_t from, String msg)
 {
-  // char cMsg[msg.length() + 1];
-  // msg.toCharArray(cMsg, sizeof(cMsg));
-  // Serial.println(cMsg);
-
   DynamicJsonBuffer jsonBuffer;
   JsonObject &root = jsonBuffer.parseObject(msg);
   if (root.success())
@@ -347,7 +347,7 @@ void parseReceivedPacket(uint32_t from, String msg)
     }
     if (root.containsKey("heartbeat"))
     {
-      addNodeToList(from, root["heartbeat"]["id"], root["heartbeat"]["type"]);
+      addNodeToList(from, root["heartbeat"]["id"], root["heartbeat"]["type"], root["heartbeat"]["memory"]);
     }
     else
     {
@@ -375,31 +375,26 @@ void parseCommand(JsonObject &root)
   }
   if (root["command"] == "useBridge")
   {
-    //    button_init();
     setNodeType("bridge");
     ESP.restart();
   }
   if (root["command"] == "useButton")
   {
-    //    button_init();
     setNodeType("button");
     ESP.restart();
   }
   if (root["command"] == "useRelay")
   {
-    //    relay_init();
     setNodeType("relay");
     ESP.restart();
   }
   if (root["command"] == "useKeypad")
   {
-    //    keypad_init();
     setNodeType("keypad");
     ESP.restart();
   }
   if (root["command"] == "useMagSwitch")
   {
-    //    magSwitch_init();
     setNodeType("magSwitch");
     ESP.restart();
   }
@@ -466,7 +461,7 @@ void createJsonPacket(String fromId, String event, String eventType, String acti
   String buffer;
   object.printTo(buffer);
   Serial.println(buffer);
-  // mesh.sendBroadcast(buffer); //TODO: test this
+  // mesh.sendBroadcast(buffer);
   mesh.sendSingle(BRIDGE_ID, buffer);
 }
 
