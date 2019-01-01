@@ -178,7 +178,7 @@ void bridge_init()
 DynamicJsonBuffer jsonNodeListBuffer;
 JsonObject &nodeList = jsonNodeListBuffer.createObject();
 
-void addNodeToList(uint32_t nodeId, String myId, String nodeType, string memory)
+void addNodeToList(uint32_t nodeId, String myId, String nodeType, String memory)
 {
   String nodeMeshId = String(nodeId); //convert node name to string
   if (!nodeList.containsKey(nodeMeshId))
