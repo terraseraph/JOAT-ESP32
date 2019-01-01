@@ -4,20 +4,26 @@
 #define MESH_PASSWORD "somepassword"
 #define MESH_PORT 5555
 
-#define STATION_SSID "NFC"
-#define STATION_PASSWORD "somepassword"
+#define STATION_SSID "cerberus"
+#define STATION_PASSWORD "Midgar5481"
 
-#define HOSTNAME "MQTT_Bridge"
+#define HOSTNAME "JoatServer"
 #define MQTTENABLE
 #define BRIDGE // to use when files are combined
 uint32_t BRIDGE_ID;
 
 int GLOBAL_PIN;
 String nodeName = "logNode"; // Name needs to be unique
-String MY_ID = "1";
+String MY_ID = "10";
 String NODE_TYPE;
 bool MQTT_ENABLED = true;
+painlessMesh mesh;
 
 //Prototypes
 void createJsonPacket(String fromId, String event, String eventType, String action, String actionType, String data);
+void preparePacketForMesh(uint32_t from, String &msg);
 void printNodeList();
+
+//Json objects
+DynamicJsonBuffer jsonNodeListBuffer;
+JsonObject &nodeList = jsonNodeListBuffer.createObject();

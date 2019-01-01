@@ -11,10 +11,14 @@
 //************************************************************
 
 #include <Arduino.h>
+
 #include <painlessMesh.h>
+
+
 // #include <WiFiClient.h>
 
 #include "globals.h"
+#include "webServer.h"
 #include "joatEEPROM.h"
 #include "joatKeypad.h"
 #include "relay.h"
@@ -22,18 +26,6 @@
 #include "magSwitch.h"
 #include "rfid.h"
 
-// Prototypes
-// void receivedCallback(uint32_t &from, String &msg);
-
-//temp for a better name
-size_t logServerId = 0;
-
-IPAddress
-getlocalIP();
-
-IPAddress myIP(0, 0, 0, 0);
-
-painlessMesh mesh;
 
 String inputString = ""; //for serial input
 
@@ -119,6 +111,7 @@ void startupInitType()
   if (NODE_TYPE == "bridge")
   {
     bridge_init();
+    webServer_init();
     nodeListScheduler.init();
     nodeListScheduler.addTask(printNodeListTask);
     printNodeListTask.enable();
@@ -175,8 +168,8 @@ void bridge_init()
 //==========================================//
 //===== List of connected nodes ===========//
 //========================================//
-DynamicJsonBuffer jsonNodeListBuffer;
-JsonObject &nodeList = jsonNodeListBuffer.createObject();
+// DynamicJsonBuffer jsonNodeListBuffer;
+// JsonObject &nodeList = jsonNodeListBuffer.createObject();
 
 void addNodeToList(uint32_t nodeId, String myId, String nodeType, String memory)
 {
@@ -198,11 +191,16 @@ void addNodeToList(uint32_t nodeId, String myId, String nodeType, String memory)
 
 void printNodeList()
 {
+  Serial.println("============= Nodes ==========");
+  
+  Serial.print("{\"IpAddress\":\"");
+  Serial.print(mesh.getStationIP());
+  Serial.println("\"}");
+
   String list;
   nodeList.printTo(list);
-  // nodeList.prettyPrintTo(list);
-  Serial.println("============= Nodes ==========");
   Serial.println("{\"nodes\":[ " + list + "]}");
+
   String mem = String(ESP.getFreeHeap());
   Serial.println("{\"memory\":" + mem + "}");
 }
@@ -465,7 +463,4 @@ void createJsonPacket(String fromId, String event, String eventType, String acti
   mesh.sendSingle(BRIDGE_ID, buffer);
 }
 
-IPAddress getlocalIP()
-{
-  return IPAddress(mesh.getStationIP());
-}
+
