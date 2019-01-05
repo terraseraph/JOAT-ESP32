@@ -14,7 +14,6 @@
 
 #include <painlessMesh.h>
 
-
 // #include <WiFiClient.h>
 
 #include "globals.h"
@@ -25,7 +24,6 @@
 #include "button.h"
 #include "magSwitch.h"
 #include "rfid.h"
-
 
 String inputString = ""; //for serial input
 
@@ -192,7 +190,7 @@ void addNodeToList(uint32_t nodeId, String myId, String nodeType, String memory)
 void printNodeList()
 {
   Serial.println("============= Nodes ==========");
-  
+
   Serial.print("{\"IpAddress\":\"");
   Serial.print(mesh.getStationIP());
   Serial.println("\"}");
@@ -277,7 +275,14 @@ void preparePacketForMesh(uint32_t from, String &msg)
     }
     if (root.containsKey("toId"))
     {
-      forwardEventActionPacket(root);
+      if (root["toId"] == MY_ID || root["toId"] == String(mesh.getNodeId()))
+      {
+        parseEventActionPacket(root);
+      }
+      else
+      {
+        forwardEventActionPacket(root);
+      }
     }
     else //just send it anyway......
     {
@@ -462,5 +467,3 @@ void createJsonPacket(String fromId, String event, String eventType, String acti
   // mesh.sendBroadcast(buffer);
   mesh.sendSingle(BRIDGE_ID, buffer);
 }
-
-
