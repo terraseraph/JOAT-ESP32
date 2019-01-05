@@ -5,7 +5,7 @@
 #define MESH_PORT 5555
 
 #define STATION_SSID "cerberus"
-#define STATION_PASSWORD "****"
+#define STATION_PASSWORD "Midgar5481"
 
 #define HOSTNAME "JoatServer"
 #define MQTTENABLE
@@ -14,7 +14,7 @@ uint32_t BRIDGE_ID;
 
 int GLOBAL_PIN;
 String nodeName = "logNode"; // Name needs to be unique
-String MY_ID = "1";
+String MY_ID = "10";
 String NODE_TYPE;
 bool MQTT_ENABLED = true;
 painlessMesh mesh;
