@@ -14,11 +14,11 @@
 
 #include <painlessMesh.h>
 
-// #include <WiFiClient.h>
 
 #include "globals.h"
 #include "webServer.h"
 #include "joatEEPROM.h"
+#include "mqtt.h"
 #include "joatKeypad.h"
 #include "relay.h"
 #include "button.h"
@@ -110,6 +110,7 @@ void startupInitType()
   {
     bridge_init();
     webServer_init();
+    mqtt_init();
     nodeListScheduler.init();
     nodeListScheduler.addTask(printNodeListTask);
     printNodeListTask.enable();
@@ -358,6 +359,9 @@ void parseReceivedPacket(uint32_t from, String msg)
     }
   }
 }
+
+
+//TODO: Parse the commands IAW the model written on notion
 
 //==============================//
 //=====Parse Command ==========//

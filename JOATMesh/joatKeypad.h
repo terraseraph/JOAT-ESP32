@@ -14,6 +14,8 @@
 #define LEFT_PIN7 12
 #define LEFT_PIN8 13
 
+#define KEYPAD_TIMEOUT 20000
+
 /////////////////////////////////
 // BUZZER
 /////////////////////////////////
@@ -24,6 +26,8 @@ bool ProcessKeyPad();
 void keypad_init();
 
 int KEYPAD_DIGITS = 6; //Amount of digits till it sends packet
+int keypad_timeout;
+int keypad_last_keypress;
 uint8_t digit_count = 0;
 uint8_t keypad_digits[11]; // number of digits to send, i.e pin number
 
@@ -55,9 +59,19 @@ void keypad_init()
 
 bool ProcessKeyPad()
 {
+  // if ((millis() - keypad_last_keypress) > KEYPAD_TIMEOUT)
+  // {
+  //   digit_count = 0;
+  //   memset(keypad_digits, 0, sizeof(keypad_digits));
+  //   //      tone(BUZZER_PIN, 1000);
+  //   //      delay(100); //Schedule these
+  //   //      noTone(BUZZER_PIN);
+  // }
+
   char key = _keypad->getKey();
   if (key != NULL)
   {
+    keypad_last_keypress = millis();
     keypad_digits[digit_count] = key;
     Serial.print("Key Pad digit buffer: ");
     Serial.println((char *)keypad_digits);
