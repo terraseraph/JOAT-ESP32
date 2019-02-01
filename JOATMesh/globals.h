@@ -16,13 +16,20 @@ int GLOBAL_PIN;
 String nodeName = "logNode"; // Name needs to be unique
 String MY_ID = "10";
 String NODE_TYPE;
+
+int MQTT_BROKER_ADDRESS[4];
 bool MQTT_ENABLED = true;
-painlessMesh mesh;
+
+
+
+painlessMesh mesh; // mesh
 
 //Prototypes
 void createJsonPacket(String fromId, String event, String eventType, String action, String actionType, String data);
 void preparePacketForMesh(uint32_t from, String &msg);
 void printNodeList();
+
+void mqttCallback(char* topic, byte* payload, unsigned int length); // mqtt
 
 //Json objects
 DynamicJsonBuffer jsonNodeListBuffer;
