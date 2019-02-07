@@ -37,7 +37,7 @@ Task taskHeartbeat(TASK_SECOND * 30, TASK_FOREVER, []() {
   String hwId = String(mesh.getNodeId());
   String mem = String(ESP.getFreeHeap());
   String msg = "{\"heartbeat\":{\"hardwareId\":" + hwId + ",\"id\":\"" + MY_ID + "\",\"type\":\"" + NODE_TYPE + "\",\"memory\":\"" + mem + "\"}}";
-  Serial.println("====Sending heartbeat to: " + hwId + "=====");
+  Serial.println("====Sending heartbeat to: " + String(BRIDGE_ID) + "=====");
   Serial.println(msg);
   mesh.sendSingle(BRIDGE_ID, msg);
   //  mesh.sendBroadcast(msg);
@@ -182,12 +182,20 @@ void addNodeToList(uint32_t nodeId, String myId, String nodeType, String memory)
     nodeObj["id"] = myId;
     nodeObj["type"] = nodeType;
     nodeObj["memory"] = memory;
+    nodeObj["lastAlive"] = 0;
+    nodeObj["lastAliveMillis"] = millis();
+
   }
   else
   {
+    long t = nodeList[nodeMeshId]["lastAliveMillis"];
+
+
     nodeList[nodeMeshId]["id"] = myId;
     nodeList[nodeMeshId]["type"] = nodeType;
     nodeList[nodeMeshId]["memory"] = memory;
+    nodeList[nodeMeshId]["lastAlive"] = abs(millis() - t);
+    nodeList[nodeMeshId]["lastAliveMillis"] = millis();
   }
 }
 
@@ -206,7 +214,7 @@ void printNodeList()
   nodeList.printTo(list);
   String msg = "{\"nodes\":[ " + list + "]}";
   Serial.println(msg);
-  if(MQTT_ENABLED){
+  if(MQTT_ENABLED && NODE_TYPE == "bridge"){
     sendMqttPacket(msg);
   }
   // Also add in a time since last heard from device
@@ -235,7 +243,7 @@ void newConnectionCallback(uint32_t nodeId)
     // root["toId"] = nodeId;
     // String msg;
     // root.printTo(msg);
-    msg = cmd_create_bridgeId(nodeId);
+    String msg = cmd_create_bridgeId(nodeId);
     Serial.print("==== Sending bridge setting id to: ");
     Serial.println(nodeId);
     mesh.sendSingle(nodeId, msg);
@@ -377,6 +385,9 @@ void parseReceivedPacket(uint32_t from, String msg)
     }
     if(root.containsKey("state")){
       state_parsePacket(root);
+      if(NODE_TYPE == "bridge"){
+        sendMqttPacket(msg);
+      }
     }
     else
     {

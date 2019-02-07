@@ -46,7 +46,7 @@ void cmd_parseCommand(JsonObject &root)
   JsonObject &command = root["command"];
   if (command["type"] == "bridgeId")
   {
-    cmd_functionChange(command);
+    cmd_bridgeId(command);
   }
 
   if (command["type"] == "functionChange")

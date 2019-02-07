@@ -91,37 +91,53 @@ void mqttCallback(char *topic, uint8_t *payload, unsigned int length)
     memcpy(cleanPayload, payload, length + 1);
     String msg = String(cleanPayload);
     free(cleanPayload);
+    String targetStr = String(topic).substring(16);
+
+    
+    
+    Serial.print(" ====== MQTT callback: ============");
+    Serial.print("topic: ");
+    Serial.print(topic);
+    // Serial.print("payload: ");
+    // Serial.print(payload);
+    Serial.print("clean msg: ");
+    Serial.print(msg);
+    Serial.print("target str: ");
+    Serial.println(targetStr);
+
+
+    // This is where all messages to this device belong
+    preparePacketForMesh(mesh.getNodeId(), msg);
 
     //msg to json
     // target == myid
     // if msg.command -> parseCommand
     // if msg.eventAction -> parseEventAction
 
-    String targetStr = String(topic).substring(16);
 
-    if (targetStr == "gateway")
-    {
-        if (msg == "getNodes")
-        {
-            _pubSubClient->publish(MQTT_TOPIC, mesh.subConnectionJson().c_str());
-        }
-    }
-    else if (targetStr == "broadcast")
-    {
-        mesh.sendBroadcast(msg);
-    }
-    else
-    {
-        uint32_t target = strtoul(targetStr.c_str(), NULL, 10);
-        if (mesh.isConnected(target))
-        {
-            mesh.sendSingle(target, msg);
-        }
-        else
-        {
-            _pubSubClient->publish(MQTT_TOPIC, "Client not connected!");
-        }
-    }
+    // if (targetStr == "gateway")
+    // {
+    //     if (msg == "getNodes")
+    //     {
+    //         _pubSubClient->publish(MQTT_TOPIC, mesh.subConnectionJson().c_str());
+    //     }
+    // }
+    // else if (targetStr == "broadcast")
+    // {
+    //     mesh.sendBroadcast(msg);
+    // }
+    // else
+    // {
+    //     uint32_t target = strtoul(targetStr.c_str(), NULL, 10);
+    //     if (mesh.isConnected(target))
+    //     {
+    //         mesh.sendSingle(target, msg);
+    //     }
+    //     else
+    //     {
+    //         _pubSubClient->publish(MQTT_TOPIC, "Client not connected!");
+    //     }
+    // }
 }
 
 void mqttConnect(){

@@ -56,7 +56,7 @@ String state_createAndSendPacket(String fromId, String type, String event, Strin
  */
 void state_parsePacket(JsonObject &root)
 {
-  // proccess data when the action type is known
+  // process data when the action type is known
   const char *state_type = root["state"]["type"]; // "action"
   JsonObject &state_message = root["state"]["message"];
   const char *state_message_toId = state_message["toId"];
@@ -71,11 +71,11 @@ void state_parsePacket(JsonObject &root)
   //Switch data type depending on action to be completed
   if (root["toId"] == MY_ID || root["toId"] == String(mesh.getNodeId()))
   {
-    if (actionType == "relay")
+    if (state_message_actionType == "relay")
     {
       Serial.println("Packet for me");
       int data = root["data"];
-      processRelayAction(action, data);
+      processRelayAction(state_message_action, data);
     }
     else //goes to serial
     {
