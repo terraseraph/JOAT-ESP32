@@ -8,32 +8,42 @@ PubSubClient *_pubSubClient;
 IPAddress mqttGetlocalIP();
 IPAddress mqttMyIP(0, 0, 0, 0);
 
-
-
 // Prototypes
 void sendMqttConnectionPayload();
+char *string2char(String command);
+void reconnect();
+void mqttConnect();
+
 
 void mqtt_init()
 {
+    Serial.println("Init MQTT");
     getMqttBrokerAddress();
     int zeroAddr[4];
     // If the address is set in the sketch as default use that
     if (tempMqttAddr != zeroAddr)
     {
-        memcpy( MQTT_BROKER_ADDRESS, tempMqttAddr, 4 );
+        memcpy(MQTT_BROKER_ADDRESS, tempMqttAddr, 4);
     }
     else
     {
         setBrokerAddress(MQTT_BROKER_ADDRESS);
     }
 
-    IPAddress mqttBroker(MQTT_BROKER_ADDRESS[0], MQTT_BROKER_ADDRESS[1], MQTT_BROKER_ADDRESS[2], MQTT_BROKER_ADDRESS[3]);
-    _pubSubClient = new PubSubClient(mqttBroker, 1883, mqttCallback, wifiClient);
+    // IPAddress mqttBroker(MQTT_BROKER_ADDRESS[0], MQTT_BROKER_ADDRESS[1], MQTT_BROKER_ADDRESS[2], MQTT_BROKER_ADDRESS[3]);
+    IPAddress mqttBroker(192, 168, 0, 180);
+    _pubSubClient = new PubSubClient(mqttBroker, MQTT_BROKER_PORT, mqttCallback, wifiClient);
+    Serial.print("Mqtt broker address:");
+    Serial.print(mqttBroker);
+    Serial.print(":");
+    Serial.println(MQTT_BROKER_PORT);
 }
 
 // TODO: unfinished from example
 void processMqtt()
 {
+
+    // loop the mqtt client logic
     _pubSubClient->loop();
 
     if (mqttMyIP != mqttGetlocalIP())
@@ -41,27 +51,34 @@ void processMqtt()
         mqttMyIP = mqttGetlocalIP();
         Serial.println("MQTT: My IP is " + mqttMyIP.toString());
 
-        if (_pubSubClient->connect(getMyIdChar()))
-        {
-            sendMqttConnectionPayload();
-            // TODO: send connection info
-        }
+        mqttConnect();
+    }
+    // reconnect if not connected
+    if (!_pubSubClient->connected())
+    {
+        mqttConnect();
     }
 }
 
-// TODO: send connection packet here
-void sendMqttConnectionPayload()
+
+
+void sendMqttPacket(String packet)
 {
-    _pubSubClient->publish(MQTT_TOPIC, "Ready!");
-    _pubSubClient->subscribe(getMyIdChar());
+    _pubSubClient->publish("root", string2char(packet));
+    Serial.println("====Sending mqtt now======");
+    Serial.println(string2char(packet));
 }
 
-
-void sendMqttPacket(String packet){
-    char* pkt;
-    packet.toCharArray(pkt, packet.length()+1);
-    _pubSubClient->publish("root", pkt);
-
+/**
+ * Helper to give a const char* instaead of string
+ */
+char *string2char(String command)
+{
+    if (command.length() != 0)
+    {
+        char *p = const_cast<char *>(command.c_str());
+        return p;
+    }
 }
 
 /**
@@ -77,9 +94,9 @@ void mqttCallback(char *topic, uint8_t *payload, unsigned int length)
 
     //msg to json
     // target == myid
-        // if msg.command -> parseCommand
-        // if msg.eventAction -> parseEventAction
-        
+    // if msg.command -> parseCommand
+    // if msg.eventAction -> parseEventAction
+
     String targetStr = String(topic).substring(16);
 
     if (targetStr == "gateway")
@@ -103,6 +120,49 @@ void mqttCallback(char *topic, uint8_t *payload, unsigned int length)
         else
         {
             _pubSubClient->publish(MQTT_TOPIC, "Client not connected!");
+        }
+    }
+}
+
+void mqttConnect(){
+    if (_pubSubClient->connect(string2char(MY_ID)))
+        {
+            sendMqttConnectionPayload();
+            // TODO: send connection info
+        }
+}
+
+// TODO: send connection packet here
+void sendMqttConnectionPayload()
+{
+    _pubSubClient->publish(MQTT_TOPIC, "Ready!");
+    _pubSubClient->subscribe(string2char(MY_ID));
+}
+
+
+// change maybe
+void reconnect()
+{
+    // Loop until we're reconnected
+    while (!_pubSubClient->connected())
+    {
+        Serial.print("Attempting MQTT connection...");
+        // Attempt to connect
+        if (_pubSubClient->connect(string2char(MY_ID)))
+        {
+            Serial.println("connected");
+            // Once connected, publish an announcement...
+            _pubSubClient->publish(MQTT_TOPIC, "reconnected");
+            // ... and resubscribe
+            _pubSubClient->subscribe(string2char(MY_ID));
+        }
+        else
+        {
+            Serial.print("failed, rc=");
+            Serial.print(_pubSubClient->state());
+            Serial.println(" try again in 5 seconds");
+            // Wait 5 seconds before retrying
+            //   delay(5000);
         }
     }
 }
