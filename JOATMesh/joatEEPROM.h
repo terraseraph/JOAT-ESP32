@@ -20,6 +20,8 @@ EEPROMClass EENODETYPE("eeprom1", 0x500);
 
 static int tempMqttAddr[4];
 
+// TODO: make use of the nvs (non volatile storage) for the id and types
+
 /*
   Generated partition that would work perfectly with this example
   #Name,   Type, SubType, Offset,   Size,    Flags
@@ -132,7 +134,7 @@ String getNodeType()
   return nt;
 }
 
-// MQTT
+// MQTT also used as set branch address
 void setBrokerAddress(int ipAddress[])
 {
   EEPROM.begin(EEPROM_SIZE);

@@ -74,6 +74,7 @@ void processButtonEvent()
 
       Serial.print("Button Event: ");
       Serial.println(data);
-      createJsonPacket(MY_ID, "toggle", "button", "noneA", "noneAT", data);
+      // createJsonPacket(MY_ID, "toggle", "button", "noneA", "noneAT", data);
+      state_createAndSendPacket(MY_ID, "event","toggle", "button", "noneA", "noneAT", data);
     }  
 }

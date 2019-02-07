@@ -17,6 +17,8 @@
 
 #include "globals.h"
 #include "joatEEPROM.h"
+#include "commands.h"
+#include "stateEventAction.h"
 #include "webServer.h"
 #include "mqtt.h"
 #include "joatKeypad.h"
@@ -52,7 +54,7 @@ void setup()
   Serial.begin(115200);
   mesh.setDebugMsgTypes(ERROR | STARTUP | CONNECTION); // set before init() so that you can see startup messages
   mesh.init(MESH_PREFIX, MESH_PASSWORD, MESH_PORT, WIFI_AP_STA, 6);
-  mesh.onReceive(&receivedCallback);
+  mesh.onReceive(&mesh_receivedCallback);
   mesh.onNewConnection(&newConnectionCallback);
 
   if (getMyId() != "0")
@@ -226,13 +228,14 @@ void newConnectionCallback(uint32_t nodeId)
 {
   if (NODE_TYPE == "bridge")
   {
-    DynamicJsonBuffer jsonBuffer;
-    JsonObject &root = jsonBuffer.createObject();
-    root["command"] = "setBridgeId";
-    root["bridgeId"] = mesh.getNodeId();
-    root["toId"] = nodeId;
-    String msg;
-    root.printTo(msg);
+    // DynamicJsonBuffer jsonBuffer;
+    // JsonObject &root = jsonBuffer.createObject();
+    // root["command"] = "setBridgeId";
+    // root["bridgeId"] = mesh.getNodeId();
+    // root["toId"] = nodeId;
+    // String msg;
+    // root.printTo(msg);
+    msg = cmd_create_bridgeId(nodeId);
     Serial.print("==== Sending bridge setting id to: ");
     Serial.println(nodeId);
     mesh.sendSingle(nodeId, msg);
@@ -247,7 +250,6 @@ void serialEvent()
   while (Serial.available())
   {
     char inChar = (char)Serial.read();
-    // Serial.print(inChar);
     inputString += inChar;
     if (inChar == '\n')
     {
@@ -273,26 +275,33 @@ void preparePacketForMesh(uint32_t from, String &msg)
   //  uint32_t target = root["toId"];
   if (root.success())
   {
+
+    // if is a command packet
     if (root.containsKey("command") && root.containsKey("toId"))
     {
       if (root["toId"] == MY_ID || root["toId"] == String(mesh.getNodeId()))
       {
-        parseCommand(root);
+        // parseCommand(root);
+        cmd_parseCommand(root);
       }
       else //broadcast command to the mesh
       {
         mesh.sendBroadcast(buffer);
       }
     }
-    if (root.containsKey("toId"))
+
+    // If is event action packet
+    if (root.containsKey("state"))
     {
       if (root["toId"] == MY_ID || root["toId"] == String(mesh.getNodeId()))
       {
-        parseEventActionPacket(root);
+        // parseEventActionPacket(root);
+        state_parsePacket(root);
       }
       else
       {
-        forwardEventActionPacket(root);
+        // forwardEventActionPacket(root);
+        state_forwardPacketToMesh(root);
       }
     }
     else //just send it anyway......
@@ -312,6 +321,8 @@ void preparePacketForMesh(uint32_t from, String &msg)
 //==============================//
 //=====Forward event action=====//
 //============================//
+
+// pretty sure this should just skip all those lines and broadcast anyway
 void forwardEventActionPacket(JsonObject &root)
 {
   /* This is an event or action to send to the network */
@@ -341,7 +352,7 @@ void forwardEventActionPacket(JsonObject &root)
 //==============================//
 //=====Received callback=======//
 //============================//
-void receivedCallback(uint32_t from, String &msg)
+void mesh_receivedCallback(uint32_t from, String &msg)
 {
   parseReceivedPacket(from, msg);
 }
@@ -357,15 +368,19 @@ void parseReceivedPacket(uint32_t from, String msg)
   {
     if (root.containsKey("command") && (root["toId"] == MY_ID || root["toId"] == String(mesh.getNodeId())))
     {
-      parseCommand(root);
+      // parseCommand(root);
+      cmd_parseCommand(root);
     }
     if (root.containsKey("heartbeat"))
     {
       addNodeToList(from, root["heartbeat"]["id"], root["heartbeat"]["type"], root["heartbeat"]["memory"]);
     }
+    if(root.containsKey("state")){
+      state_parsePacket(root);
+    }
     else
     {
-      parseEventActionPacket(root);
+      // parseEventActionPacket(root);
     }
   }
 }

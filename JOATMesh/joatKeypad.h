@@ -85,8 +85,8 @@ bool ProcessKeyPad()
 
     if (digit_count == KEYPAD_DIGITS)
     {
-      //strcpy((char*) sentMessage[sentMessageHead].packet.data, (const char*)keypad_digits);
-      createJsonPacket(MY_ID, "code", "keypad", "noneA", "noneAT", (char *)keypad_digits);
+      // createJsonPacket(MY_ID, "code", "keypad", "noneA", "noneAT", (char *)keypad_digits);
+      state_createAndSendPacket(MY_ID, "event","code", "keypad", "noneA", "noneAT", (char *)keypad_digits);
       // clear the pad
       digit_count = 0;
       memset(keypad_digits, 0, sizeof(keypad_digits));
