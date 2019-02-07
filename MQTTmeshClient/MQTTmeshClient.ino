@@ -17,8 +17,8 @@
 
 
 Scheduler     userScheduler; // to control your personal task
-uint32_t BRIDGE_ID;
-namedMesh  mesh;
+// uint32_t BRIDGE_ID;
+// namedMesh  mesh;
 
 String inputString = "";
 

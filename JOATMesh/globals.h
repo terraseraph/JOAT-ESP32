@@ -17,7 +17,7 @@ String nodeName = "logNode"; // Name needs to be unique
 String MY_ID = "10";
 String NODE_TYPE;
 
-int MQTT_BROKER_ADDRESS[4];
+int MQTT_BROKER_ADDRESS[4] = {192,168,0,180};
 bool MQTT_ENABLED = true;
 
 

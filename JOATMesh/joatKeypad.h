@@ -30,6 +30,7 @@ int keypad_timeout;
 int keypad_last_keypress;
 uint8_t digit_count = 0;
 uint8_t keypad_digits[11]; // number of digits to send, i.e pin number
+bool playTimeoutSound = false;
 
 const uint8_t KEYPAD_ROWS = 4;
 const uint8_t KEYPAD_COLS = 4;
@@ -59,14 +60,18 @@ void keypad_init()
 
 bool ProcessKeyPad()
 {
-  // if ((millis() - keypad_last_keypress) > KEYPAD_TIMEOUT)
-  // {
-  //   digit_count = 0;
-  //   memset(keypad_digits, 0, sizeof(keypad_digits));
-  //   //      tone(BUZZER_PIN, 1000);
-  //   //      delay(100); //Schedule these
-  //   //      noTone(BUZZER_PIN);
-  // }
+  if ((millis() - keypad_last_keypress) > KEYPAD_TIMEOUT)
+  {
+    // reset keys pressed
+    digit_count = 0;
+    memset(keypad_digits, 0, sizeof(keypad_digits));
+    if(playTimeoutSound){
+        //  tone(BUZZER_PIN, 1000);
+        //  delay(100); //Schedule these
+        //  noTone(BUZZER_PIN);
+         playTimeoutSound = false;
+    }
+  }
 
   char key = _keypad->getKey();
   if (key != NULL)
@@ -76,6 +81,7 @@ bool ProcessKeyPad()
     Serial.print("Key Pad digit buffer: ");
     Serial.println((char *)keypad_digits);
     digit_count++;
+    playTimeoutSound = true;
 
     if (digit_count == KEYPAD_DIGITS)
     {
@@ -84,7 +90,7 @@ bool ProcessKeyPad()
       // clear the pad
       digit_count = 0;
       memset(keypad_digits, 0, sizeof(keypad_digits));
-
+      playTimeoutSound = false;
       //      tone(BUZZER_PIN, 1000);
       //      delay(100); //Schedule these
       //      noTone(BUZZER_PIN);

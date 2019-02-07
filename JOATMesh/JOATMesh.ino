@@ -16,8 +16,8 @@
 
 
 #include "globals.h"
-#include "webServer.h"
 #include "joatEEPROM.h"
+#include "webServer.h"
 #include "mqtt.h"
 #include "joatKeypad.h"
 #include "relay.h"
@@ -199,6 +199,7 @@ void printNodeList()
   String list;
   nodeList.printTo(list);
   Serial.println("{\"nodes\":[ " + list + "]}");
+  // Also add in a time since last heard from device
 
   String mem = String(ESP.getFreeHeap());
   Serial.println("{\"memory\":" + mem + "}");
