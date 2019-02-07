@@ -151,6 +151,7 @@ void processEventLoop()
   if (NODE_TYPE == "bridge") //if it is the bridge
   {
     nodeListScheduler.execute();
+    processMqtt();
   }
 }
 
