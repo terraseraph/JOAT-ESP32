@@ -127,6 +127,7 @@ void mqttCallback(char *topic, uint8_t *payload, unsigned int length)
 void mqttConnect(){
     if (_pubSubClient->connect(string2char(MY_ID)))
         {
+            Serial.print("Attempting MQTT connection...");
             sendMqttConnectionPayload();
             // TODO: send connection info
         }
@@ -137,34 +138,6 @@ void sendMqttConnectionPayload()
 {
     _pubSubClient->publish(MQTT_TOPIC, "Ready!");
     _pubSubClient->subscribe(string2char(MY_ID));
-}
-
-
-// change maybe
-void reconnect()
-{
-    // Loop until we're reconnected
-    while (!_pubSubClient->connected())
-    {
-        Serial.print("Attempting MQTT connection...");
-        // Attempt to connect
-        if (_pubSubClient->connect(string2char(MY_ID)))
-        {
-            Serial.println("connected");
-            // Once connected, publish an announcement...
-            _pubSubClient->publish(MQTT_TOPIC, "reconnected");
-            // ... and resubscribe
-            _pubSubClient->subscribe(string2char(MY_ID));
-        }
-        else
-        {
-            Serial.print("failed, rc=");
-            Serial.print(_pubSubClient->state());
-            Serial.println(" try again in 5 seconds");
-            // Wait 5 seconds before retrying
-            //   delay(5000);
-        }
-    }
 }
 
 IPAddress mqttGetlocalIP()
