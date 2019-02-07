@@ -14,7 +14,7 @@ uint32_t BRIDGE_ID;
 
 int GLOBAL_PIN;
 String nodeName = "logNode"; // Name needs to be unique
-String MY_ID = "10";
+String MY_ID = "11";
 String NODE_TYPE;
 
 char* MY_ID_CHAR;
@@ -35,6 +35,8 @@ painlessMesh mesh; // mesh
 void createJsonPacket(String fromId, String event, String eventType, String action, String actionType, String data);
 void preparePacketForMesh(uint32_t from, String &msg);
 void printNodeList();
+
+void processRelayAction(String action, int pinNo); //relay
 
 void mqttCallback(char* topic, byte* payload, unsigned int length); // mqtt
 void sendMqttPacket(String packet); //mqtt
