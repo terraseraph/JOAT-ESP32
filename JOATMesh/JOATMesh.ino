@@ -188,6 +188,9 @@ void addNodeToList(uint32_t nodeId, String myId, String nodeType, String memory)
   }
 }
 
+/**
+ * Print node list
+ */
 void printNodeList()
 {
   Serial.println("============= Nodes ==========");
@@ -198,8 +201,13 @@ void printNodeList()
 
   String list;
   nodeList.printTo(list);
-  Serial.println("{\"nodes\":[ " + list + "]}");
+  String msg = "{\"nodes\":[ " + list + "]}";
+  Serial.println(msg);
+  if(MQTT_ENABLED){
+    sendMqttPacket(msg);
+  }
   // Also add in a time since last heard from device
+
 
   String mem = String(ESP.getFreeHeap());
   Serial.println("{\"memory\":" + mem + "}");
