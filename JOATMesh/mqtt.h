@@ -34,8 +34,6 @@ void mqtt_init()
 // TODO: unfinished from example
 void processMqtt()
 {
-    char* MY_ID_CHAR;
-    MY_ID.toCharArray(MY_ID_CHAR, MY_ID.length()+1);
     _pubSubClient->loop();
 
     if (mqttMyIP != mqttGetlocalIP())
@@ -43,9 +41,10 @@ void processMqtt()
         mqttMyIP = mqttGetlocalIP();
         Serial.println("MQTT: My IP is " + mqttMyIP.toString());
 
-        if (_pubSubClient->connect(MY_ID_CHAR))
+        if (_pubSubClient->connect(getMyIdChar()))
         {
             sendMqttConnectionPayload();
+            // TODO: send connection info
         }
     }
 }
@@ -53,10 +52,21 @@ void processMqtt()
 // TODO: send connection packet here
 void sendMqttConnectionPayload()
 {
-    _pubSubClient->publish("painlessMesh/from/gateway", "Ready!");
-    _pubSubClient->subscribe("painlessMesh/to/#");
+    _pubSubClient->publish(MQTT_TOPIC, "Ready!");
+    _pubSubClient->subscribe(getMyIdChar());
 }
 
+
+void sendMqttPacket(String packet){
+    char* pkt;
+    packet.toCharArray(pkt, packet.length()+1);
+    _pubSubClient->publish("root", pkt);
+
+}
+
+/**
+ * Process incoming MQTT packets here
+ */
 void mqttCallback(char *topic, uint8_t *payload, unsigned int length)
 {
     char *cleanPayload = (char *)malloc(length + 1);
@@ -65,13 +75,18 @@ void mqttCallback(char *topic, uint8_t *payload, unsigned int length)
     String msg = String(cleanPayload);
     free(cleanPayload);
 
+    //msg to json
+    // target == myid
+        // if msg.command -> parseCommand
+        // if msg.eventAction -> parseEventAction
+        
     String targetStr = String(topic).substring(16);
 
     if (targetStr == "gateway")
     {
         if (msg == "getNodes")
         {
-            _pubSubClient->publish("painlessMesh/from/gateway", mesh.subConnectionJson().c_str());
+            _pubSubClient->publish(MQTT_TOPIC, mesh.subConnectionJson().c_str());
         }
     }
     else if (targetStr == "broadcast")
@@ -87,7 +102,7 @@ void mqttCallback(char *topic, uint8_t *payload, unsigned int length)
         }
         else
         {
-            _pubSubClient->publish("painlessMesh/from/gateway", "Client not connected!");
+            _pubSubClient->publish(MQTT_TOPIC, "Client not connected!");
         }
     }
 }
