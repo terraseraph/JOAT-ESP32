@@ -1,40 +1,49 @@
-#include "globals.h"
+// #include "globals.h"
 #include <PubSubClient.h> // mqtt
 #include <WiFiClient.h>   //mqtt
 
 WiFiClient wifiClient;
-PubSubClient *_pubSubClient = NULL;
+PubSubClient *_pubSubClient;
 
 IPAddress mqttGetlocalIP();
 IPAddress mqttMyIP(0, 0, 0, 0);
 
+
+
+// Prototypes
+void sendMqttConnectionPayload();
+
 void mqtt_init()
 {
+    getMqttBrokerAddress();
+    int zeroAddr[4];
     // If the address is set in the sketch as default use that
-    if (getMqttBrokerAddress() != [ 0, 0, 0, 0 ])
+    if (tempMqttAddr != zeroAddr)
     {
-        MQTT_BROKER_ADDRESS = getMqttBrokerAddress();
+        memcpy( MQTT_BROKER_ADDRESS, tempMqttAddr, 4 );
     }
     else
     {
-        getMqttBrokerAddress(MQTT_BROKER_ADDRESS);
+        setBrokerAddress(MQTT_BROKER_ADDRESS);
     }
 
     IPAddress mqttBroker(MQTT_BROKER_ADDRESS[0], MQTT_BROKER_ADDRESS[1], MQTT_BROKER_ADDRESS[2], MQTT_BROKER_ADDRESS[3]);
-    _pubSubClient = new mqttClient(mqttBroker, 1883, mqttCallback, wifiClient);
+    _pubSubClient = new PubSubClient(mqttBroker, 1883, mqttCallback, wifiClient);
 }
 
 // TODO: unfinished from example
 void processMqtt()
 {
-    mqttClient.loop();
+    char* MY_ID_CHAR;
+    MY_ID.toCharArray(MY_ID_CHAR, MY_ID.length()+1);
+    _pubSubClient->loop();
 
     if (mqttMyIP != mqttGetlocalIP())
     {
         mqttMyIP = mqttGetlocalIP();
         Serial.println("MQTT: My IP is " + mqttMyIP.toString());
 
-        if (mqttClient.connect(MY_ID))
+        if (_pubSubClient->connect(MY_ID_CHAR))
         {
             sendMqttConnectionPayload();
         }
@@ -44,8 +53,8 @@ void processMqtt()
 // TODO: send connection packet here
 void sendMqttConnectionPayload()
 {
-    mqttClient.publish("painlessMesh/from/gateway", "Ready!");
-    mqttClient.subscribe("painlessMesh/to/#");
+    _pubSubClient->publish("painlessMesh/from/gateway", "Ready!");
+    _pubSubClient->subscribe("painlessMesh/to/#");
 }
 
 void mqttCallback(char *topic, uint8_t *payload, unsigned int length)
@@ -62,7 +71,7 @@ void mqttCallback(char *topic, uint8_t *payload, unsigned int length)
     {
         if (msg == "getNodes")
         {
-            mqttClient.publish("painlessMesh/from/gateway", mesh.subConnectionJson().c_str());
+            _pubSubClient->publish("painlessMesh/from/gateway", mesh.subConnectionJson().c_str());
         }
     }
     else if (targetStr == "broadcast")
@@ -78,7 +87,7 @@ void mqttCallback(char *topic, uint8_t *payload, unsigned int length)
         }
         else
         {
-            mqttClient.publish("painlessMesh/from/gateway", "Client not connected!");
+            _pubSubClient->publish("painlessMesh/from/gateway", "Client not connected!");
         }
     }
 }

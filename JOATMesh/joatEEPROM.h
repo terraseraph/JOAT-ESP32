@@ -18,6 +18,8 @@ EEPROMClass EENODETYPE("eeprom1", 0x500);
 #define MQTT_ADDRESS_START 4
 #define NODE_ID_START 20
 
+static int tempMqttAddr[4];
+
 /*
   Generated partition that would work perfectly with this example
   #Name,   Type, SubType, Offset,   Size,    Flags
@@ -141,6 +143,8 @@ void setBrokerAddress(int ipAddress[])
   EEPROM.commit();
 }
 
+
+
 void getMqttBrokerAddress()
 {
   int addr[4];
@@ -149,5 +153,8 @@ void getMqttBrokerAddress()
   addr[1] = (EEPROM.readInt(MQTT_ADDRESS_START + 4));
   addr[2] = (EEPROM.readInt(MQTT_ADDRESS_START + 8));
   addr[3] = (EEPROM.readInt(MQTT_ADDRESS_START + 12));
-  return addr;
+  tempMqttAddr[0] = addr[0];
+  tempMqttAddr[1] = addr[1];
+  tempMqttAddr[2] = addr[2];
+  tempMqttAddr[3] = addr[3];
 }
