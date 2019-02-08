@@ -9,6 +9,7 @@
 // ESP32 gnd -> relay gnd
 // NANO 5v -> relay COM
 //////////////////////////////
+#include "HardwareSerial.h"
 
 #define REL_PIN1 15 // relay pin
 #define REL_PIN2 2
@@ -30,40 +31,39 @@ Task toggleOff(RELAY_TOGGLE_DELAY, 1, &relayToggleOff);
 
 void relay_init()
 {
-
   relayScheduler.init();
   relayScheduler.addTask(toggleOn);
   relayScheduler.addTask(toggleOff);
 
-  pinMode(REL_PIN1, INPUT_PULLUP);
+  // pinMode(REL_PIN1, INPUT_PULLUP);
   pinMode(REL_PIN1, OUTPUT);
   digitalWrite(REL_PIN1, HIGH);
 
   // pinMode(REL_PIN2, INPUT_PULLUP);
-  // pinMode(REL_PIN2, OUTPUT);
-  // digitalWrite(REL_PIN2, HIGH);
+  pinMode(REL_PIN2, OUTPUT);
+  digitalWrite(REL_PIN2, HIGH);
 
-  pinMode(REL_PIN3, INPUT_PULLUP);
+  // pinMode(REL_PIN3, INPUT_PULLUP);
   pinMode(REL_PIN3, OUTPUT);
   digitalWrite(REL_PIN3, HIGH);
 
-  pinMode(REL_PIN4, INPUT_PULLUP);
+  // pinMode(REL_PIN4, INPUT_PULLUP);
   pinMode(REL_PIN4, OUTPUT);
   digitalWrite(REL_PIN4, HIGH);
 
-  pinMode(REL_PIN5, INPUT_PULLUP);
+  // pinMode(REL_PIN5, INPUT_PULLUP);
   pinMode(REL_PIN5, OUTPUT);
   digitalWrite(REL_PIN5, HIGH);
 
-  pinMode(REL_PIN6, INPUT_PULLUP);
+  // pinMode(REL_PIN6, INPUT_PULLUP);
   pinMode(REL_PIN6, OUTPUT);
   digitalWrite(REL_PIN6, HIGH);
 
-  pinMode(REL_PIN7, INPUT_PULLUP);
+  // pinMode(REL_PIN7, INPUT_PULLUP);
   pinMode(REL_PIN7, OUTPUT);
   digitalWrite(REL_PIN7, HIGH);
 
-  pinMode(REL_PIN8, INPUT_PULLUP);
+  // pinMode(REL_PIN8, INPUT_PULLUP);
   pinMode(REL_PIN8, OUTPUT);
   digitalWrite(REL_PIN8, HIGH);
 
