@@ -2,6 +2,8 @@
 #include <PubSubClient.h> // mqtt
 #include <WiFiClient.h>   //mqtt
 
+#define MQTT_MAX_PACKET_SIZE 2048
+
 WiFiClient wifiClient;
 PubSubClient *_pubSubClient;
 

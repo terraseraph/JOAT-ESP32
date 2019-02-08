@@ -66,19 +66,21 @@ void state_parsePacket(JsonObject &root)
   const char *state_message_action = state_message["action"];
   const char *state_message_actionType = state_message["actionType"];
 
-  String msg;
-  root.printTo(msg);
   //Switch data type depending on action to be completed
   if (root["toId"] == MY_ID || root["toId"] == String(mesh.getNodeId()))
   {
-    if (state_message_actionType == "relay")
+    Serial.println("Packet for me");
+    Serial.println(state_message_actionType);
+    // if (state_message_actionType == "relay")
+    if(strcmp(state_message_actionType, "relay") == 0)
     {
-      Serial.println("Packet for me");
-      int data = root["data"];
+      int data = root["state"]["message"]["data"];
       processRelayAction(state_message_action, data);
     }
     else //goes to serial
     {
+      String msg;
+      root.printTo(msg);
       Serial.println(msg);
     }
   }
@@ -94,7 +96,7 @@ void state_forwardPacketToMesh(JsonObject &root)
   String buffer;
   root.printTo(buffer);
   mesh.sendBroadcast(buffer); //TODO: change to sendSingle()
-  #ifdef DEV_DEBUG
+#ifdef DEV_DEBUG
   /* for debugging messages */
   String msg = toId;
   msg += wait;
