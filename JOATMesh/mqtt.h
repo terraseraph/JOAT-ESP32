@@ -1,4 +1,6 @@
 // #include "globals.h"
+#define MQTT_MAX_PACKET_SIZE 2048
+
 #include <PubSubClient.h> // mqtt
 #include <WiFiClient.h>   //mqtt
 
@@ -15,7 +17,6 @@ void sendMqttConnectionPayload();
 char *string2char(String command);
 void reconnect();
 void mqttConnect();
-
 
 void mqtt_init()
 {
@@ -62,11 +63,9 @@ void processMqtt()
     }
 }
 
-
-
 void sendMqttPacket(String packet)
 {
-    _pubSubClient->publish("root", string2char(packet));
+    _pubSubClient->publish(MQTT_TOPIC, string2char(packet));
     Serial.println("====Sending mqtt now======");
     Serial.println(string2char(packet));
 }
@@ -95,8 +94,6 @@ void mqttCallback(char *topic, uint8_t *payload, unsigned int length)
     free(cleanPayload);
     String targetStr = String(topic).substring(16);
 
-    
-    
     Serial.print(" ====== MQTT callback: ============");
     Serial.print("topic: ");
     Serial.print(topic);
@@ -107,7 +104,6 @@ void mqttCallback(char *topic, uint8_t *payload, unsigned int length)
     Serial.print("target str: ");
     Serial.println(targetStr);
 
-
     // This is where all messages to this device belong
     preparePacketForMesh(mesh.getNodeId(), msg);
 
@@ -115,7 +111,6 @@ void mqttCallback(char *topic, uint8_t *payload, unsigned int length)
     // target == myid
     // if msg.command -> parseCommand
     // if msg.eventAction -> parseEventAction
-
 
     // if (targetStr == "gateway")
     // {
@@ -142,19 +137,34 @@ void mqttCallback(char *topic, uint8_t *payload, unsigned int length)
     // }
 }
 
-void mqttConnect(){
+String createMqttConnectionPacket()
+{
+    DynamicJsonBuffer jsonBuffer;
+
+    JsonObject &root = jsonBuffer.createObject();
+    root["JOAT_CONNECT"] = true;
+    root["id"] = MY_ID;
+    root["ipAddress"] = mqttMyIP.toString();
+    root["name"] = MY_ID;
+    String msg;
+    root.printTo(msg);
+    return msg;
+}
+
+void mqttConnect()
+{
     if (_pubSubClient->connect(string2char(MY_ID)))
-        {
-            Serial.print("Attempting MQTT connection...");
-            sendMqttConnectionPayload();
-            // TODO: send connection info
-        }
+    {
+        Serial.print("Attempting MQTT connection...");
+        sendMqttConnectionPayload();
+        // TODO: send connection info
+    }
 }
 
 // TODO: send connection packet here
 void sendMqttConnectionPayload()
 {
-    _pubSubClient->publish(MQTT_TOPIC, "Ready!");
+    _pubSubClient->publish(MQTT_TOPIC, string2char(createMqttConnectionPacket()));
     _pubSubClient->subscribe(string2char(MY_ID));
 }
 

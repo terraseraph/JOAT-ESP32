@@ -4,8 +4,8 @@
 #define MESH_PASSWORD "somepassword"
 #define MESH_PORT 5555
 
-#define STATION_SSID "cerberus"
-#define STATION_PASSWORD "Midgar5481"
+#define STATION_SSID "######"
+#define STATION_PASSWORD "######"
 
 #define HOSTNAME "JoatServer"
 #define MQTTENABLE
@@ -35,6 +35,8 @@ painlessMesh mesh; // mesh
 void createJsonPacket(String fromId, String event, String eventType, String action, String actionType, String data);
 void preparePacketForMesh(uint32_t from, String &msg);
 void printNodeList();
+
+char *IPAddressToString(uint8_t ip); //webServer
 
 void processRelayAction(String action, int pinNo); //relay
 
