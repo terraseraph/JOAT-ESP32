@@ -32,11 +32,12 @@ String state_createAndSendPacket(String fromId, String type, String event, Strin
 
   root["toId"] = String(BRIDGE_ID);
   state["type"] = type;
-  state_message["wait"] = "0";
+  state_message["fromId"] = fromId;
   state_message["event"] = event;
   state_message["eventType"] = eventType;
   state_message["action"] = action;
   state_message["actionType"] = actionType;
+  state_message["wait"] = "0";
   state_message["data"] = data;
 
   String buffer;

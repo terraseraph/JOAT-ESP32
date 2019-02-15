@@ -166,6 +166,7 @@ void sendMqttConnectionPayload()
 {
     _pubSubClient->publish(MQTT_TOPIC, string2char(createMqttConnectionPacket()));
     _pubSubClient->subscribe(string2char(MY_ID));
+    Serial.print("MQTT connected!");
 }
 
 IPAddress mqttGetlocalIP()

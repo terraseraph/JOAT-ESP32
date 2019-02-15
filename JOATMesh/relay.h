@@ -1,13 +1,10 @@
 ///////////////////////////////
 // relay pins
 // Note:
-// For 8 channel relay - bugs exist for power just from the ESP32
-// Need a 5v source that is stable - using an arduino nano for ease
-// ESP32 Vin -> NANO 3v3
-// ESP32 gnd -> NANO gnd
-// ESP32 3v3 -> relay VCC
-// ESP32 gnd -> relay gnd
-// NANO 5v -> relay COM
+// For 8 channel relay - Cannot power from esp32 alone
+// Relay VCC & GND -> 5V external supply
+// COM -> ESP32 3v3
+// Pins then corrospond.
 //////////////////////////////
 #include "HardwareSerial.h"
 
@@ -68,7 +65,7 @@ void relay_init()
   digitalWrite(REL_PIN8, HIGH);
 
   NODE_TYPE = "relay";
-  setNodeType("relay");
+  // setNodeType("relay");
 }
 
 void relayToggleOn()

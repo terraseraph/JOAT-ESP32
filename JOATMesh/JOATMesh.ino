@@ -14,7 +14,6 @@
 
 #include <painlessMesh.h>
 
-
 #include "globals.h"
 #include "joatEEPROM.h"
 #include "commands.h"
@@ -32,6 +31,15 @@ String inputString = ""; //for serial input
 //==============================//
 //=====Heartbeat Init =========//
 //============================//
+Scheduler reconnectScheduler;
+Task taskReconnect(TASK_SECOND * 60, TASK_FOREVER, [](){
+  if(BRIDGE_ID == 0){
+    mesh.stop();
+    mesh.init(MESH_PREFIX, MESH_PASSWORD, MESH_PORT, WIFI_AP_STA, 6);
+  }
+});
+
+
 Scheduler scheduler;
 Task taskHeartbeat(TASK_SECOND * 30, TASK_FOREVER, []() {
   String hwId = String(mesh.getNodeId());
@@ -70,6 +78,8 @@ void setup()
   if (NODE_TYPE != "bridge")
   {
     scheduler.addTask(taskHeartbeat);
+    reconnectScheduler.addTask(taskReconnect);
+    taskReconnect.enable();
     taskHeartbeat.enable();
   }
   mesh.setContainsRoot(true);
@@ -163,7 +173,8 @@ void bridge_init()
   mesh.stationManual(STATION_SSID, STATION_PASSWORD);
   mesh.setHostname(HOSTNAME);
   mesh.setRoot(true);
-  if(MQTT_ENABLED){
+  if (MQTT_ENABLED)
+  {
     mqtt_init();
   }
   webServer_init();
@@ -183,21 +194,24 @@ void addNodeToList(uint32_t nodeId, String myId, String nodeType, String memory)
     JsonObject &nodeObj = nodeList.createNestedObject(nodeMeshId);
     nodeObj["id"] = myId;
     nodeObj["type"] = nodeType;
-    nodeObj["memory"] = memory;
-    nodeObj["lastAlive"] = 0;
-    nodeObj["lastAliveMillis"] = millis();
-
+    nodeObj["mem"] = memory;
+    // nodeObj["lastAlive"] = 0;
+    nodeObj["alive"] = millis();
   }
   else
   {
     long t = nodeList[nodeMeshId]["lastAliveMillis"];
 
-
     nodeList[nodeMeshId]["id"] = myId;
     nodeList[nodeMeshId]["type"] = nodeType;
-    nodeList[nodeMeshId]["memory"] = memory;
-    nodeList[nodeMeshId]["lastAlive"] = abs(millis() - t);
-    nodeList[nodeMeshId]["lastAliveMillis"] = millis();
+    nodeList[nodeMeshId]["mem"] = memory;
+    // nodeList[nodeMeshId]["lastAlive"] = abs(millis() - t);
+    nodeList[nodeMeshId]["alive"] = millis();
+  }
+  String msg = "{\"heartbeat\":{\"hardwareId\":" + nodeMeshId + ",\"id\":\"" + myId + "\",\"type\":\"" + nodeType + "\",\"memory\":\"" + memory + "\"}}";
+  Serial.println(msg);
+  if(MQTT_ENABLED){
+    sendMqttPacket(msg);
   }
 }
 
@@ -208,27 +222,18 @@ void printNodeList()
 {
   String msgIp = mesh.getStationIP().toString();
   String mem = String(ESP.getFreeHeap());
-  String list;
-  nodeList.printTo(list);
+  // String list;
+  // nodeList.printTo(list);
 
   Serial.println("============= Nodes ==========");
-
-  // Serial.print("{\"IpAddress\":\"");
-  // Serial.print(msgIp);
-  // Serial.println("\"}");
-  // Serial.println("{\"memory\":" + mem + "}");
-
-
-
-  // String msg = "{\"nodes\":[ " + list + "]\"}";
-  String msg = "{\"nodes\":[\""+ list +"\"],\"bridgeMemory\":"+ mem +",\"ipAddress\":\""+ msgIp +"\"}";
+  // String msg = "{\"nodes\":[\""+ list +"\"],\"bridgeMemory\":"+ mem +",\"ipAddress\":\""+ msgIp +"\"}";
+  String msg = "{\"bridgeMemory\":" + mem + ",\"ipAddress\":\"" + msgIp + "\"}";
   Serial.println(msg);
-  if(MQTT_ENABLED && NODE_TYPE == "bridge"){
+  if (MQTT_ENABLED && NODE_TYPE == "bridge")
+  {
     sendMqttPacket(msg);
   }
   // Also add in a time since last heard from device
-
-
 }
 
 void removeNodeFromList(String nodeName)
@@ -334,27 +339,27 @@ void preparePacketForMesh(uint32_t from, String &msg)
 void forwardEventActionPacket(JsonObject &root)
 {
   /* This is an event or action to send to the network */
-//   const char *toId = root["toId"];
-//   const char *wait = root["wait"];
-//   const char *event = root["event"];
-//   const char *eventType = root["eventType"];
-//   const char *action = root["action"];
-//   const char *actionType = root["actionType"];
-//   const char *data = root["data"];
-//   String buffer;
-//   root.printTo(buffer);
-//   mesh.sendBroadcast(buffer); //TODO: change to sendSingle()
-// #ifdef DEV_DEBUG
-//   /* for debugging messages */
-//   String msg = toId;
-//   msg += wait;
-//   msg += event;
-//   msg += eventType;
-//   msg += action;
-//   msg += actionType;
-//   msg += data;
-//   Serial.printf(msg);
-// #endif
+  //   const char *toId = root["toId"];
+  //   const char *wait = root["wait"];
+  //   const char *event = root["event"];
+  //   const char *eventType = root["eventType"];
+  //   const char *action = root["action"];
+  //   const char *actionType = root["actionType"];
+  //   const char *data = root["data"];
+  //   String buffer;
+  //   root.printTo(buffer);
+  //   mesh.sendBroadcast(buffer); //TODO: change to sendSingle()
+  // #ifdef DEV_DEBUG
+  //   /* for debugging messages */
+  //   String msg = toId;
+  //   msg += wait;
+  //   msg += event;
+  //   msg += eventType;
+  //   msg += action;
+  //   msg += actionType;
+  //   msg += data;
+  //   Serial.printf(msg);
+  // #endif
 }
 
 //==============================//
@@ -383,9 +388,11 @@ void parseReceivedPacket(uint32_t from, String msg)
     {
       addNodeToList(from, root["heartbeat"]["id"], root["heartbeat"]["type"], root["heartbeat"]["memory"]);
     }
-    if(root.containsKey("state")){
+    if (root.containsKey("state"))
+    {
       state_parsePacket(root);
-      if(NODE_TYPE == "bridge"){
+      if (NODE_TYPE == "bridge")
+      {
         sendMqttPacket(msg);
       }
     }
@@ -395,7 +402,6 @@ void parseReceivedPacket(uint32_t from, String msg)
     }
   }
 }
-
 
 //TODO: Parse the commands IAW the model written on notion
 
