@@ -4,8 +4,8 @@
 #define MESH_PASSWORD "somepassword"
 #define MESH_PORT 5555
 
-#define STATION_SSID "######"
-#define STATION_PASSWORD "######"
+#define STATION_SSID "cerberus"
+#define STATION_PASSWORD "Midgar5481"
 
 #define HOSTNAME "JoatServer"
 #define MQTTENABLE
@@ -14,7 +14,7 @@ uint32_t BRIDGE_ID;
 
 int GLOBAL_PIN;
 String nodeName = "logNode"; // Name needs to be unique
-String MY_ID = "12";
+String MY_ID = "13";
 String NODE_TYPE;
 
 char* MY_ID_CHAR;
