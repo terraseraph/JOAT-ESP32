@@ -13,6 +13,7 @@
 #define BTN_PIN8 19
 #define BTN_PIN9 21
 
+void processButtonEvent();
 unsigned long btnLastDebounceTime=millis();
 
 void button_init() {
@@ -27,6 +28,18 @@ void button_init() {
   pinMode(BTN_PIN8, INPUT_PULLUP);
   pinMode(BTN_PIN9, INPUT_PULLUP);
 
+  attachInterrupt(BTN_PIN0, processButtonEvent, FALLING);
+  Serial.println("=== Button init ====");
+  Serial.println(digitalRead(BTN_PIN0));
+  Serial.println(digitalRead(BTN_PIN1));
+  Serial.println(digitalRead(BTN_PIN2));
+  Serial.println(digitalRead(BTN_PIN3));
+  Serial.println(digitalRead(BTN_PIN4));
+  Serial.println(digitalRead(BTN_PIN5));
+  Serial.println(digitalRead(BTN_PIN6));
+  Serial.println(digitalRead(BTN_PIN7));
+  Serial.println(digitalRead(BTN_PIN8));
+  Serial.println(digitalRead(BTN_PIN9));
   NODE_TYPE = "button";
 //  setNodeType("button");
 }
@@ -74,6 +87,7 @@ void processButtonEvent()
 
       Serial.print("Button Event: ");
       Serial.println(data);
-      createJsonPacket(MY_ID, "toggle", "button", "noneA", "noneAT", data);
+      // createJsonPacket(MY_ID, "toggle", "button", "noneA", "noneAT", data);
+      state_createAndSendPacket(MY_ID, "event","toggle", "button", "noneA", "noneAT", data);
     }  
 }
