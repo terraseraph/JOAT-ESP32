@@ -154,6 +154,8 @@ void rfidReadingData()
         Serial.write(buffer[i]);
     }
     Serial.println(" ");
+    const char *strBuffer = reinterpret_cast<const char*>(buffer);
+    state_createAndSendPacket(MY_ID, "event", "code", "rfid", "noneA", "noneAT", strBuffer);
 }
 
 void rfidWritingData()

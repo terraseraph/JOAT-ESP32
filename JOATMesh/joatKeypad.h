@@ -14,6 +14,8 @@
 #define LEFT_PIN7 12
 #define LEFT_PIN8 13
 
+#define KEYPAD_TIMEOUT 20000
+
 /////////////////////////////////
 // BUZZER
 /////////////////////////////////
@@ -24,8 +26,11 @@ bool ProcessKeyPad();
 void keypad_init();
 
 int KEYPAD_DIGITS = 6; //Amount of digits till it sends packet
+int keypad_timeout;
+int keypad_last_keypress;
 uint8_t digit_count = 0;
 uint8_t keypad_digits[11]; // number of digits to send, i.e pin number
+bool playTimeoutSound = false;
 
 const uint8_t KEYPAD_ROWS = 4;
 const uint8_t KEYPAD_COLS = 4;
@@ -55,22 +60,37 @@ void keypad_init()
 
 bool ProcessKeyPad()
 {
+  if ((millis() - keypad_last_keypress) > KEYPAD_TIMEOUT)
+  {
+    // reset keys pressed
+    digit_count = 0;
+    memset(keypad_digits, 0, sizeof(keypad_digits));
+    if(playTimeoutSound){
+        //  tone(BUZZER_PIN, 1000);
+        //  delay(100); //Schedule these
+        //  noTone(BUZZER_PIN);
+         playTimeoutSound = false;
+    }
+  }
+
   char key = _keypad->getKey();
   if (key != NULL)
   {
+    keypad_last_keypress = millis();
     keypad_digits[digit_count] = key;
     Serial.print("Key Pad digit buffer: ");
     Serial.println((char *)keypad_digits);
     digit_count++;
+    playTimeoutSound = true;
 
     if (digit_count == KEYPAD_DIGITS)
     {
-      //strcpy((char*) sentMessage[sentMessageHead].packet.data, (const char*)keypad_digits);
-      createJsonPacket(MY_ID, "code", "keypad", "noneA", "noneAT", (char *)keypad_digits);
+      // createJsonPacket(MY_ID, "code", "keypad", "noneA", "noneAT", (char *)keypad_digits);
+      state_createAndSendPacket(MY_ID, "event","code", "keypad", "noneA", "noneAT", (char *)keypad_digits);
       // clear the pad
       digit_count = 0;
       memset(keypad_digits, 0, sizeof(keypad_digits));
-
+      playTimeoutSound = false;
       //      tone(BUZZER_PIN, 1000);
       //      delay(100); //Schedule these
       //      noTone(BUZZER_PIN);

@@ -87,7 +87,8 @@ void processMagSwitchEvent() {
         if (magnet9 == LOW) int_data[9] = 1;
         String str_data = intToStringArray(int_data, 10);
         // Serial.println(str_data);
-        createJsonPacket(MY_ID, "toggle", "magnetSwitch", "noneA", "noneAT", str_data);
+        // createJsonPacket(MY_ID, "toggle", "magnetSwitch", "noneA", "noneAT", str_data);
+        state_createAndSendPacket(MY_ID, "event", "toggle", "magnetSwitch", "noneA", "noneAT", str_data);
     }
   }
 
