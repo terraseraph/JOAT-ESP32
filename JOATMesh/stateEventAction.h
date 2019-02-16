@@ -1,5 +1,5 @@
 //prototypes
-String state_createAndSendPacket(String fromId, String type, String event, String eventType, String action, String actionType, String data);
+void state_createAndSendPacket(String fromId, String type, String event, String eventType, String action, String actionType, String data);
 void state_parsePacket(JsonObject &root);
 void state_forwardPacketToMesh(JsonObject &root);
 // ===================================================
@@ -11,7 +11,7 @@ void state_forwardPacketToMesh(JsonObject &root);
  * type = event/action
  * returns a String to send over the mesh
  */
-String state_createAndSendPacket(String fromId, String type, String event, String eventType, String action, String actionType, String data)
+void state_createAndSendPacket(String fromId, String type, String event, String eventType, String action, String actionType, String data)
 {
   DynamicJsonBuffer jsonBuffer;
   JsonObject &root = jsonBuffer.createObject();
@@ -43,7 +43,7 @@ String state_createAndSendPacket(String fromId, String type, String event, Strin
   String buffer;
   root.printTo(buffer);
   mesh.sendSingle(BRIDGE_ID, buffer);
-  return buffer;
+  return;
 }
 
 // =============================================
@@ -92,20 +92,7 @@ void state_parsePacket(JsonObject &root)
   }
 }
 
-void state_forwardPacketToMesh(JsonObject &root)
+void state_forwardPacketToMesh(String buffer)
 {
-  String buffer;
-  root.printTo(buffer);
   mesh.sendBroadcast(buffer); //TODO: change to sendSingle()
-#ifdef DEV_DEBUG
-  /* for debugging messages */
-  String msg = toId;
-  msg += wait;
-  msg += event;
-  msg += eventType;
-  msg += action;
-  msg += actionType;
-  msg += data;
-  Serial.printf(msg);
-#endif
 }
