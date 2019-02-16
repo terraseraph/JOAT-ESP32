@@ -29,33 +29,24 @@
 String inputString = ""; //for serial input
 
 //==============================//
-//=====Heartbeat Init =========//
+//===== Scheduler Init ========//
 //============================//
-Scheduler reconnectScheduler;
-Task taskReconnect(TASK_SECOND * 60, TASK_FOREVER, [](){
-  if(BRIDGE_ID == 0){
-    mesh.stop();
-    mesh.init(MESH_PREFIX, MESH_PASSWORD, MESH_PORT, WIFI_AP_STA, 6);
-  }
-});
 
+// Scheduler reconnectScheduler;
+Task taskReconnect(TASK_SECOND * 180, TASK_FOREVER, &taskPrepareMeshReconnect);
 
-Scheduler scheduler;
-Task taskHeartbeat(TASK_SECOND * 30, TASK_FOREVER, []() {
-  String hwId = String(mesh.getNodeId());
-  String mem = String(ESP.getFreeHeap());
-  String msg = "{\"heartbeat\":{\"hardwareId\":" + hwId + ",\"id\":\"" + MY_ID + "\",\"type\":\"" + NODE_TYPE + "\",\"memory\":\"" + mem + "\"}}";
-  Serial.println("====Sending heartbeat to: " + String(BRIDGE_ID) + "=====");
-  Serial.println(msg);
-  mesh.sendSingle(BRIDGE_ID, msg);
-  //  mesh.sendBroadcast(msg);
-});
+// Scheduler heartbeatScheduler;
+Task taskHeartbeat(TASK_SECOND * 30, TASK_FOREVER, &taskPrepareHeartbeat);
+
+// Scheduler nodeListScheduler;
+Task printNodeListTask(TASK_SECOND * 60, TASK_FOREVER, &printNodeList);
+
+// Scheduler bridgeIdScheduler;
+Task taskBridgeId(TASK_SECOND * 20, TASK_FOREVER, &taskBroadcastBridgeId);
 
 //==============================//
 //===== Node list print =======//
 //============================//
-Scheduler nodeListScheduler;
-Task printNodeListTask(TASK_SECOND * 60, TASK_FOREVER, &printNodeList);
 
 void setup()
 {
@@ -78,7 +69,7 @@ void setup()
   if (NODE_TYPE != "bridge")
   {
     scheduler.addTask(taskHeartbeat);
-    reconnectScheduler.addTask(taskReconnect);
+    scheduler.addTask(taskReconnect);
     taskReconnect.enable();
     taskHeartbeat.enable();
   }
@@ -121,9 +112,10 @@ void startupInitType()
   if (NODE_TYPE == "bridge")
   {
     bridge_init();
-    nodeListScheduler.init();
-    nodeListScheduler.addTask(printNodeListTask);
+    scheduler.addTask(printNodeListTask);
+    scheduler.addTask(taskBridgeId);
     printNodeListTask.enable();
+    taskBridgeId.enable();
   };
   Serial.println("======  Using " + NODE_TYPE + " =====");
 }
@@ -160,7 +152,7 @@ void processEventLoop()
   }
   if (NODE_TYPE == "bridge") //if it is the bridge
   {
-    nodeListScheduler.execute();
+    scheduler.execute();
     processMqtt();
   }
 }
@@ -177,14 +169,15 @@ void bridge_init()
   {
     mqtt_init();
   }
-  webServer_init();
+  if (HTTP_ENABLED)
+  {
+    webServer_init();
+  }
 }
 
 //==========================================//
 //===== List of connected nodes ===========//
 //========================================//
-// DynamicJsonBuffer jsonNodeListBuffer;
-// JsonObject &nodeList = jsonNodeListBuffer.createObject();
 
 void addNodeToList(uint32_t nodeId, String myId, String nodeType, String memory)
 {
@@ -195,22 +188,17 @@ void addNodeToList(uint32_t nodeId, String myId, String nodeType, String memory)
     nodeObj["id"] = myId;
     nodeObj["type"] = nodeType;
     nodeObj["mem"] = memory;
-    // nodeObj["lastAlive"] = 0;
-    nodeObj["alive"] = millis();
   }
   else
   {
-    long t = nodeList[nodeMeshId]["lastAliveMillis"];
-
     nodeList[nodeMeshId]["id"] = myId;
     nodeList[nodeMeshId]["type"] = nodeType;
     nodeList[nodeMeshId]["mem"] = memory;
-    // nodeList[nodeMeshId]["lastAlive"] = abs(millis() - t);
-    nodeList[nodeMeshId]["alive"] = millis();
   }
   String msg = "{\"heartbeat\":{\"hardwareId\":" + nodeMeshId + ",\"id\":\"" + myId + "\",\"type\":\"" + nodeType + "\",\"memory\":\"" + memory + "\"}}";
   Serial.println(msg);
-  if(MQTT_ENABLED){
+  if (MQTT_ENABLED)
+  {
     sendMqttPacket(msg);
   }
 }
@@ -222,18 +210,15 @@ void printNodeList()
 {
   String msgIp = mesh.getStationIP().toString();
   String mem = String(ESP.getFreeHeap());
-  // String list;
-  // nodeList.printTo(list);
 
   Serial.println("============= Nodes ==========");
-  // String msg = "{\"nodes\":[\""+ list +"\"],\"bridgeMemory\":"+ mem +",\"ipAddress\":\""+ msgIp +"\"}";
   String msg = "{\"bridgeMemory\":" + mem + ",\"ipAddress\":\"" + msgIp + "\"}";
   Serial.println(msg);
   if (MQTT_ENABLED && NODE_TYPE == "bridge")
   {
     sendMqttPacket(msg);
   }
-  // Also add in a time since last heard from device
+  return;
 }
 
 void removeNodeFromList(String nodeName)
@@ -248,11 +233,13 @@ void newConnectionCallback(uint32_t nodeId)
 {
   if (NODE_TYPE == "bridge")
   {
-    String msg = cmd_create_bridgeId(nodeId);
+    String msg = cmd_create_bridgeId(nodeId, false);
     Serial.print("==== Sending bridge setting id to: ");
     Serial.println(nodeId);
+    Serial.println(msg);
     mesh.sendSingle(nodeId, msg);
   }
+  return;
 }
 
 //==============================//
@@ -268,15 +255,16 @@ void serialEvent()
     {
       preparePacketForMesh(mesh.getNodeId(), inputString);
       inputString = "";
-      Serial.println("{\"ready\":\"true\"}"); //tells the server we are ready for another message
+      Serial.println(readyMessage); //tells the server we are ready for another message
     }
   }
+  return;
 }
 
 //==============================//
 //=====Prepare packet=======//
 //============================//
-//Used for direct input from serial (later for http messages)
+//Used for direct input from serial/http/mqtt
 void preparePacketForMesh(uint32_t from, String &msg)
 {
   // Saving logServer
@@ -285,16 +273,18 @@ void preparePacketForMesh(uint32_t from, String &msg)
   JsonObject &root = jsonBuffer.parseObject(msg);
   String buffer;
   root.printTo(buffer);
-  //  uint32_t target = root["toId"];
   if (root.success())
   {
 
+    if (root.containsKey("query"))
+    {
+      cmd_bridge_query(root);
+    }
     // if is a command packet
     if (root.containsKey("command") && root.containsKey("toId"))
     {
       if (root["toId"] == MY_ID || root["toId"] == String(mesh.getNodeId()))
       {
-        // parseCommand(root);
         cmd_parseCommand(root);
       }
       else //broadcast command to the mesh
@@ -308,13 +298,11 @@ void preparePacketForMesh(uint32_t from, String &msg)
     {
       if (root["toId"] == MY_ID || root["toId"] == String(mesh.getNodeId()))
       {
-        // parseEventActionPacket(root);
         state_parsePacket(root);
       }
       else
       {
-        // forwardEventActionPacket(root);
-        state_forwardPacketToMesh(root);
+        state_forwardPacketToMesh(buffer);
       }
     }
     else //just send it anyway......
@@ -324,42 +312,54 @@ void preparePacketForMesh(uint32_t from, String &msg)
   }
   else //not a json message
   {
-    Serial.printf("JSON parsing failed");
+    Serial.println("JSON parsing failed");
     mesh.sendBroadcast(msg, false);
   }
-  Serial.printf("Sending message from %u msg=%s\n", from, msg.c_str());
-  //mesh.sendSingle(target, msg);  //TODO: setup the send single later
+  Serial.print("Sending message from : ");
+  Serial.print(from);
+  Serial.print(" message: ");
+  Serial.print(msg);
+  return;
 }
 
-//==============================//
-//=====Forward event action=====//
-//============================//
-
-// pretty sure this should just skip all those lines and broadcast anyway
-void forwardEventActionPacket(JsonObject &root)
+//====================================//
+//===== Scheduled Task functions ====//
+//==================================//
+void taskPrepareHeartbeat()
 {
-  /* This is an event or action to send to the network */
-  //   const char *toId = root["toId"];
-  //   const char *wait = root["wait"];
-  //   const char *event = root["event"];
-  //   const char *eventType = root["eventType"];
-  //   const char *action = root["action"];
-  //   const char *actionType = root["actionType"];
-  //   const char *data = root["data"];
-  //   String buffer;
-  //   root.printTo(buffer);
-  //   mesh.sendBroadcast(buffer); //TODO: change to sendSingle()
-  // #ifdef DEV_DEBUG
-  //   /* for debugging messages */
-  //   String msg = toId;
-  //   msg += wait;
-  //   msg += event;
-  //   msg += eventType;
-  //   msg += action;
-  //   msg += actionType;
-  //   msg += data;
-  //   Serial.printf(msg);
-  // #endif
+  DynamicJsonBuffer jsonBuffer;
+  JsonObject &root = jsonBuffer.createObject();
+  JsonObject &heartbeat = root.createNestedObject("heartbeat");
+
+  String hwId = String(mesh.getNodeId());
+  String mem = String(ESP.getFreeHeap());
+  String msgBuffer;
+  heartbeat["hardwareId"] = hwId;
+  heartbeat["id"] = MY_ID;
+  heartbeat["type"] = NODE_TYPE;
+  heartbeat["memory"] = mem;
+
+  root.printTo(msgBuffer);
+  Serial.println("====Sending heartbeat to: " + String(BRIDGE_ID) + "=====");
+  Serial.println(msgBuffer);
+  mesh.sendSingle(BRIDGE_ID, msgBuffer);
+}
+
+void taskBroadcastBridgeId()
+{
+  String msg = cmd_create_bridgeId(0, true);
+  Serial.println("==== Broadcasting bridge id ===== ");
+  mesh.sendBroadcast(msg);
+}
+
+void taskPrepareMeshReconnect()
+{
+  if (BRIDGE_ID == 0)
+  {
+    Serial.println("=== Bridge unset, restarting mesh connection ===");
+    mesh.stop();
+    mesh.init(MESH_PREFIX, MESH_PASSWORD, MESH_PORT, WIFI_AP_STA, 6);
+  }
 }
 
 //==============================//
@@ -368,6 +368,7 @@ void forwardEventActionPacket(JsonObject &root)
 void mesh_receivedCallback(uint32_t from, String &msg)
 {
   parseReceivedPacket(from, msg);
+  return;
 }
 
 //==============================//
@@ -375,141 +376,45 @@ void mesh_receivedCallback(uint32_t from, String &msg)
 //============================//
 void parseReceivedPacket(uint32_t from, String msg)
 {
+  Serial.println("==== parsing Received packet =======");
+
   DynamicJsonBuffer jsonBuffer;
   JsonObject &root = jsonBuffer.parseObject(msg);
+  String serialBuffer;
+  root.printTo(serialBuffer);
+  Serial.println(serialBuffer);
   if (root.success())
   {
+
     if (root.containsKey("command") && (root["toId"] == MY_ID || root["toId"] == String(mesh.getNodeId())))
     {
-      // parseCommand(root);
       cmd_parseCommand(root);
     }
+
+    if (root.containsKey("command") && root["toId"] == "broadcast")
+    {
+      cmd_broadcast(root);
+    }
+
     if (root.containsKey("heartbeat"))
     {
       addNodeToList(from, root["heartbeat"]["id"], root["heartbeat"]["type"], root["heartbeat"]["memory"]);
     }
+
+    // Event Action
     if (root.containsKey("state"))
     {
       state_parsePacket(root);
       if (NODE_TYPE == "bridge")
       {
         sendMqttPacket(msg);
+        //TODO: maybe serial here too
       }
     }
+
     else
     {
-      // parseEventActionPacket(root);
     }
   }
-}
-
-//TODO: Parse the commands IAW the model written on notion
-
-//==============================//
-//=====Parse Command ==========//
-//============================//
-void parseCommand(JsonObject &root)
-{
-  // if (root["command"] == "setBridgeId")
-  // {
-  //   BRIDGE_ID = root["bridgeId"];
-  //   Serial.print("===== Bridge ID set : ");
-  //   Serial.println(BRIDGE_ID);
-  //   return;
-  // }
-  // if (root["command"] == "setId")
-  // {
-  //   setNodeId(root["nodeId"]);
-  //   ESP.restart();
-  // }
-  // if (root["command"] == "useBridge")
-  // {
-  //   setNodeType("bridge");
-  //   ESP.restart();
-  // }
-  // if (root["command"] == "useButton")
-  // {
-  //   setNodeType("button");
-  //   ESP.restart();
-  // }
-  // if (root["command"] == "useRelay")
-  // {
-  //   setNodeType("relay");
-  //   ESP.restart();
-  // }
-  // if (root["command"] == "useKeypad")
-  // {
-  //   setNodeType("keypad");
-  //   ESP.restart();
-  // }
-  // if (root["command"] == "useMagSwitch")
-  // {
-  //   setNodeType("magSwitch");
-  //   ESP.restart();
-  // }
-  // if (root["command"] == "useRfid")
-  // {
-  //   setNodeType("rfid");
-  //   ESP.restart();
-  // }
-  // if (root["command"] == "getMeshNodes")
-  // {
-  //   printNodeList();
-  // }
-}
-
-//=========================================//
-//==== Parse Event action Packet =========//
-//=======================================//
-void parseEventActionPacket(JsonObject &root)
-{
-  // String toId = root["toId"];
-  // const char *wait = root["wait"];
-  // const char *event = root["event"];
-  // const char *eventType = root["eventType"];
-  // String action = root["action"];
-  // String actionType = root["actionType"];
-
-  // String msg;
-  // root.printTo(msg);
-  // //Switch data type depending on action to be completed
-  // if (root["toId"] == MY_ID || root["toId"] == String(mesh.getNodeId()))
-  // {
-  //   if (actionType == "relay")
-  //   {
-  //     Serial.println("Packet for me");
-  //     int data = root["data"];
-  //     processRelayAction(action, data);
-  //   }
-  //   else //goes to serial
-  //   {
-  //     Serial.println(msg);
-  //   }
-  // }
-  // else
-  // {
-  //   Serial.printf("Not for me");
-  //   return;
-  // }
-}
-
-//=========================================//
-//==== Create JSON Packet ================//
-//=======================================//
-void createJsonPacket(String fromId, String event, String eventType, String action, String actionType, String data)
-{
-  // DynamicJsonBuffer jsonBuffer;
-  // JsonObject &object = jsonBuffer.createObject();
-  // object["toId"] = String(BRIDGE_ID);
-  // object["fromId"] = fromId;
-  // object["event"] = event;
-  // object["eventType"] = eventType;
-  // object["action"] = action;
-  // object["actionType"] = actionType;
-  // object["data"] = data;
-  // String buffer;
-  // object.printTo(buffer);
-  // Serial.println(buffer);
-  // // mesh.sendBroadcast(buffer);
-  // mesh.sendSingle(BRIDGE_ID, buffer);
+  return;
 }
