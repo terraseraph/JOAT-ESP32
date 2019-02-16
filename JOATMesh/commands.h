@@ -25,6 +25,9 @@
 // Prototypes
 String cmd_create_bridgeId(uint32_t nodeId);
 
+void cmd_query_nodeList();
+void cmd_query_subConnections();
+
 void cmd_bridgeId(JsonObject &cmd);
 void cmd_functionChange(JsonObject &cmd);
 void cmd_admin(JsonObject &cmd);
@@ -75,31 +78,81 @@ void cmd_parseCommand(JsonObject &root)
   }
 }
 
+// Parse Broadcast commands
+void cmd_broadcast(JsonObject &root)
+{
+  JsonObject &command = root["command"];
+  if (command["type"] == "bridgeId")
+  {
+    cmd_bridgeId(command);
+  }
+}
 
+// Parse bridge queries
+void cmd_bridge_query(JsonObject &root)
+{
+  JsonObject &query = root["query"];
+  if (query["type"] == "nodes")
+  {
+    cmd_query_nodeList();
+  }
+  if (query["type"] == "subconnections")
+  {
+    cmd_query_subConnections();
+  }
+}
 
+// =============================================
+// =========== Create queries to send =========
+// =============================================
+void cmd_query_subConnections()
+{
+  String msg = mesh.subConnectionJson();
+  Serial.println(msg);
+  sendMqttPacket(msg);
+}
+
+void cmd_query_nodeList()
+{
+  SimpleList<uint32_t> nodes;
+  nodes = mesh.getNodeList();
+  Serial.printf("Num nodes: %d\n", nodes.size());
+  Serial.printf("Connection list:");
+
+  SimpleList<uint32_t>::iterator node = nodes.begin();
+  while (node != nodes.end())
+  {
+    Serial.printf(" %u", *node);
+    node++;
+  }
+  Serial.println();
+}
 
 // =============================================
 // =========== Create Commands to send =========
 // =============================================
 
-String cmd_create_bridgeId(uint32_t nodeId)
+String cmd_create_bridgeId(uint32_t nodeId, bool broadcast)
 {
   DynamicJsonBuffer jsonBuffer;
   JsonObject &root = jsonBuffer.createObject();
-  JsonObject& command = root.createNestedObject("command");
+  JsonObject &command = root.createNestedObject("command");
 
-  root["toId"] = nodeId;                  // send to this id
+  if (broadcast)
+  {
+    root["toId"] = "broadcast"; //broadcast
+  }
+  else
+  {
+    root["toId"] = nodeId; // send to this id
+  }
 
-  command["type"] = "bridgeId";           // command type
-  command["message"] = mesh.getNodeId();  // set this node as the id
+  command["type"] = "bridgeId";          // command type
+  command["message"] = mesh.getNodeId(); // set this node as the id
   String msg;
   root.printTo(msg);
   return msg;
 }
-
-
-
-
 
 // =============================================
 // =========== Execute commands ================
