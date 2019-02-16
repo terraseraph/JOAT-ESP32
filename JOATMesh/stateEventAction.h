@@ -92,20 +92,7 @@ void state_parsePacket(JsonObject &root)
   }
 }
 
-void state_forwardPacketToMesh(JsonObject &root)
+void state_forwardPacketToMesh(String buffer)
 {
-  String buffer;
-  root.printTo(buffer);
   mesh.sendBroadcast(buffer); //TODO: change to sendSingle()
-#ifdef DEV_DEBUG
-  /* for debugging messages */
-  String msg = toId;
-  msg += wait;
-  msg += event;
-  msg += eventType;
-  msg += action;
-  msg += actionType;
-  msg += data;
-  Serial.printf(msg);
-#endif
 }

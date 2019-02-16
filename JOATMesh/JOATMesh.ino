@@ -312,13 +312,11 @@ void preparePacketForMesh(uint32_t from, String &msg)
     {
       if (root["toId"] == MY_ID || root["toId"] == String(mesh.getNodeId()))
       {
-        // parseEventActionPacket(root);
         state_parsePacket(root);
       }
       else
       {
-        // forwardEventActionPacket(root);
-        state_forwardPacketToMesh(root);
+        state_forwardPacketToMesh(buffer);
       }
     }
     else //just send it anyway......
