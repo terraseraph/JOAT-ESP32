@@ -65,7 +65,8 @@ void processMqtt()
 
 void sendMqttPacket(String packet)
 {
-    _pubSubClient->publish(MQTT_TOPIC, string2char(packet));
+    // _pubSubClient->publish(MQTT_TOPIC, string2char(packet));
+    _pubSubClient->publish(MQTT_TOPIC, const_cast<char *>(packet.c_str()));
     Serial.println("====Sending mqtt now======");
     Serial.println(string2char(packet));
 }
@@ -97,8 +98,6 @@ void mqttCallback(char *topic, uint8_t *payload, unsigned int length)
     Serial.print(" ====== MQTT callback: ============");
     Serial.print("topic: ");
     Serial.print(topic);
-    // Serial.print("payload: ");
-    // Serial.print(payload);
     Serial.print("clean msg: ");
     Serial.print(msg);
     Serial.print("target str: ");
@@ -106,35 +105,8 @@ void mqttCallback(char *topic, uint8_t *payload, unsigned int length)
 
     // This is where all messages to this device belong
     preparePacketForMesh(mesh.getNodeId(), msg);
-
-    //msg to json
-    // target == myid
-    // if msg.command -> parseCommand
-    // if msg.eventAction -> parseEventAction
-
-    // if (targetStr == "gateway")
-    // {
-    //     if (msg == "getNodes")
-    //     {
-    //         _pubSubClient->publish(MQTT_TOPIC, mesh.subConnectionJson().c_str());
-    //     }
-    // }
-    // else if (targetStr == "broadcast")
-    // {
-    //     mesh.sendBroadcast(msg);
-    // }
-    // else
-    // {
-    //     uint32_t target = strtoul(targetStr.c_str(), NULL, 10);
-    //     if (mesh.isConnected(target))
-    //     {
-    //         mesh.sendSingle(target, msg);
-    //     }
-    //     else
-    //     {
-    //         _pubSubClient->publish(MQTT_TOPIC, "Client not connected!");
-    //     }
-    // }
+    sendMqttPacket(readyMessage);
+    return;
 }
 
 String createMqttConnectionPacket()
@@ -148,6 +120,7 @@ String createMqttConnectionPacket()
     root["name"] = MY_ID;
     String msg;
     root.printTo(msg);
+
     return msg;
 }
 
@@ -157,14 +130,16 @@ void mqttConnect()
     {
         Serial.print("Attempting MQTT connection...");
         sendMqttConnectionPayload();
-        // TODO: send connection info
     }
 }
 
 // TODO: send connection packet here
 void sendMqttConnectionPayload()
 {
-    _pubSubClient->publish(MQTT_TOPIC, string2char(createMqttConnectionPacket()));
+    String connectionPacket = createMqttConnectionPacket();
+    char* msg = string2char(connectionPacket);
+
+    _pubSubClient->publish(MQTT_TOPIC, msg);
     _pubSubClient->subscribe(string2char(MY_ID));
     Serial.print("MQTT connected!");
 }

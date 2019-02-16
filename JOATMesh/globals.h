@@ -53,3 +53,6 @@ char* getMyIdChar(){
     MY_ID.toCharArray(MY_ID_CHAR, MY_ID.length()+1);
     return MY_ID_CHAR;
 }
+
+//Global strings
+const PROGMEM  String readyMessage  = {"{\"ready\":\"true\"}"};
