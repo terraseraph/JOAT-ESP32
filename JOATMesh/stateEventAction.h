@@ -97,10 +97,12 @@ void state_forwardPacketToMesh(String buffer, String toId)
   uint32_t nodeId = getNodeHardwareId(toId);
   if (nodeId != 0)
   {
+    Serial.println("Sending to node" + String(nodeId));
     mesh.sendSingle(nodeId, buffer);
   }
   else
   {
+    Serial.println("broadcasting, cannot find node id");
     mesh.sendBroadcast(buffer);
   }
 }

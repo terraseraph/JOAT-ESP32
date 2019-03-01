@@ -62,9 +62,12 @@ void sendMqttPacket(String packet)
     {
         return;
     }
-    mqttClient.publish(MQTT_TOPIC, 0, false, string2char(packet));
+
+    char *pkt = const_cast<char *>(packet.c_str());
+    mqttClient.publish(MQTT_TOPIC, 0, false, pkt);
     Serial.println("====Sending mqtt now======");
     Serial.println(packet);
+    memset(&pkt, 0, sizeof(pkt));
 }
 
 /**
@@ -210,7 +213,7 @@ void onMqttMessage(char *topic, char *payload, AsyncMqttClientMessageProperties 
     Serial.print("  total: ");
     Serial.println(total);
     String msg = String(payload);
-    Serial.print("===== payload =====");
+    Serial.println("===== payload =====");
     Serial.println(msg);
     preparePacketForMesh(mesh.getNodeId(), msg);
     sendMqttPacket(readyMessage);

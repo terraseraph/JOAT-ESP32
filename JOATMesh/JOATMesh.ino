@@ -182,9 +182,7 @@ void bridge_init()
 
 class MeshNode
 {
-
 public:
-  // MeshNode();
   uint32_t hardwareId;
   String id;
   String nodeType;
@@ -372,6 +370,7 @@ void preparePacketForMesh(uint32_t from, String &msg)
   Serial.print(from);
   Serial.print(" message: ");
   Serial.print(msg);
+  Serial.flush();
   return;
 }
 
