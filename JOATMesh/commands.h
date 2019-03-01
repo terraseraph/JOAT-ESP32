@@ -164,6 +164,8 @@ void cmd_bridgeId(JsonObject &cmd)
   BRIDGE_ID = cmd["message"];
   Serial.print("===== Bridge ID set : ");
   Serial.println(BRIDGE_ID);
+  //Once the bridge is set, send device information
+  taskPrepareHeartbeat();
 }
 
 /**

@@ -1,7 +1,7 @@
 //prototypes
 void state_createAndSendPacket(String fromId, String type, String event, String eventType, String action, String actionType, String data);
 void state_parsePacket(JsonObject &root);
-void state_forwardPacketToMesh(JsonObject &root);
+void state_forwardPacketToMesh(JsonObject &root, String toId);
 // ===================================================
 // =========== Create State Packets to send ==========
 // ===================================================
@@ -73,7 +73,7 @@ void state_parsePacket(JsonObject &root)
     Serial.println("Packet for me");
     Serial.println(state_message_actionType);
     // if (state_message_actionType == "relay")
-    if(strcmp(state_message_actionType, "relay") == 0)
+    if (strcmp(state_message_actionType, "relay") == 0)
     {
       int data = root["state"]["message"]["data"];
       processRelayAction(state_message_action, data);
@@ -92,7 +92,15 @@ void state_parsePacket(JsonObject &root)
   }
 }
 
-void state_forwardPacketToMesh(String buffer)
+void state_forwardPacketToMesh(String buffer, String toId)
 {
-  mesh.sendBroadcast(buffer); //TODO: change to sendSingle()
+  uint32_t nodeId = getNodeHardwareId(toId);
+  if (nodeId != 0)
+  {
+    mesh.sendSingle(nodeId, buffer);
+  }
+  else
+  {
+    mesh.sendBroadcast(buffer);
+  }
 }

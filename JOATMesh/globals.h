@@ -36,6 +36,7 @@ void taskPrepareMeshReconnect();
 void taskPrepareHeartbeat();
 void taskBroadcastBridgeId();
 void printNodeList();
+uint32_t getNodeHardwareId(String id);
 
 char *IPAddressToString(uint8_t ip); //webServer
 

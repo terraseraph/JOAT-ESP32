@@ -14,6 +14,7 @@
 
 #include <painlessMesh.h>
 
+#include "LinkedList.h"
 #include "globals.h"
 #include "joatEEPROM.h"
 #include "commands.h"
@@ -179,22 +180,72 @@ void bridge_init()
 //===== List of connected nodes ===========//
 //========================================//
 
+class MeshNode
+{
+
+public:
+  // MeshNode();
+  uint32_t hardwareId;
+  String id;
+  String nodeType;
+  String memory;
+};
+NLinkedList<MeshNode *> meshNodeList = NLinkedList<MeshNode *>();
+
+uint32_t getNodeHardwareId(String id)
+{
+  MeshNode *node;
+  for (int i = 0; i < meshNodeList.size(); i++)
+  {
+    node = meshNodeList.get(i);
+    if (node->id == id)
+    {
+      return node->hardwareId;
+    }
+  }
+  return 0;
+}
+
 void addNodeToList(uint32_t nodeId, String myId, String nodeType, String memory)
 {
+  MeshNode *node;
+  bool nodeExists = false;
+  for (int i = 0; i < meshNodeList.size(); i++)
+  {
+    node = meshNodeList.get(i);
+    if (node->hardwareId == nodeId)
+    {
+      nodeExists = true;
+
+      node->id = myId;
+      node->nodeType = nodeType;
+      node->memory = memory;
+    }
+  }
+  if (!nodeExists)
+  {
+    node = new MeshNode();
+    node->hardwareId = nodeId;
+    node->id = myId;
+    node->nodeType = nodeType;
+    node->memory = memory;
+    meshNodeList.add(node);
+  }
+
   String nodeMeshId = String(nodeId); //convert node name to string
-  if (!nodeList.containsKey(nodeMeshId))
-  {
-    JsonObject &nodeObj = nodeList.createNestedObject(nodeMeshId);
-    nodeObj["id"] = myId;
-    nodeObj["type"] = nodeType;
-    nodeObj["mem"] = memory;
-  }
-  else
-  {
-    nodeList[nodeMeshId]["id"] = myId;
-    nodeList[nodeMeshId]["type"] = nodeType;
-    nodeList[nodeMeshId]["mem"] = memory;
-  }
+  // if (!nodeList.containsKey(nodeMeshId))
+  // {
+  //   JsonObject &nodeObj = nodeList.createNestedObject(nodeMeshId);
+  //   nodeObj["id"] = myId;
+  //   nodeObj["type"] = nodeType;
+  //   nodeObj["mem"] = memory;
+  // }
+  // else
+  // {
+  //   nodeList[nodeMeshId]["id"] = myId;
+  //   nodeList[nodeMeshId]["type"] = nodeType;
+  //   nodeList[nodeMeshId]["mem"] = memory;
+  // }
   String msg = "{\"heartbeat\":{\"hardwareId\":" + nodeMeshId + ",\"id\":\"" + myId + "\",\"type\":\"" + nodeType + "\",\"memory\":\"" + memory + "\"}}";
   Serial.println(msg);
   if (MQTT_ENABLED)
@@ -289,7 +340,8 @@ void preparePacketForMesh(uint32_t from, String &msg)
       }
       else //broadcast command to the mesh
       {
-        mesh.sendBroadcast(buffer);
+        state_forwardPacketToMesh(buffer, root["toId"]);
+        // mesh.sendBroadcast(buffer);
       }
     }
 
@@ -302,12 +354,13 @@ void preparePacketForMesh(uint32_t from, String &msg)
       }
       else
       {
-        state_forwardPacketToMesh(buffer);
+        state_forwardPacketToMesh(buffer, root["toId"]);
       }
     }
     else //just send it anyway......
     {
-      mesh.sendBroadcast(buffer);
+      state_forwardPacketToMesh(buffer, root["toId"]);
+      // mesh.sendBroadcast(buffer);
     }
   }
   else //not a json message
