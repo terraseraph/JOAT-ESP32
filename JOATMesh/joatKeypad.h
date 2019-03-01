@@ -32,6 +32,24 @@ uint8_t digit_count = 0;
 uint8_t keypad_digits[11]; // number of digits to send, i.e pin number
 bool playTimeoutSound = false;
 
+//Buzzer
+int freq = 2000;
+int channel = 0;
+int resolution = 8;
+long buzzerDebounce;
+
+void processBuzzer()
+{
+  if ((millis() - buzzerDebounce) < 256) //if 256 milliseconds has passed since last bounce
+  {
+    return; //read value again now that bouncing is over
+  }
+  else
+  {
+    ledcWriteTone(channel, 0);
+  }
+}
+
 const uint8_t KEYPAD_ROWS = 4;
 const uint8_t KEYPAD_COLS = 4;
 char keypadKeys[KEYPAD_ROWS][KEYPAD_COLS] = {
@@ -56,20 +74,25 @@ void keypad_init()
   NODE_TYPE = "keypad";
 
   memset(keypad_digits, 0, sizeof(keypad_digits));
+
+  // ==== Buzzer init ==== //
+  ledcSetup(channel, freq, resolution);
+  ledcAttachPin(26, channel);
 }
 
 bool ProcessKeyPad()
 {
+  processBuzzer();
   if ((millis() - keypad_last_keypress) > KEYPAD_TIMEOUT)
   {
     // reset keys pressed
     digit_count = 0;
     memset(keypad_digits, 0, sizeof(keypad_digits));
-    if(playTimeoutSound){
-        //  tone(BUZZER_PIN, 1000);
-        //  delay(100); //Schedule these
-        //  noTone(BUZZER_PIN);
-         playTimeoutSound = false;
+    if (playTimeoutSound)
+    {
+      ledcWriteTone(channel, 5000);
+      buzzerDebounce = millis();
+      playTimeoutSound = false;
     }
   }
 
@@ -85,21 +108,18 @@ bool ProcessKeyPad()
 
     if (digit_count == KEYPAD_DIGITS)
     {
-      // createJsonPacket(MY_ID, "code", "keypad", "noneA", "noneAT", (char *)keypad_digits);
-      state_createAndSendPacket(MY_ID, "event","code", "keypad", "noneA", "noneAT", (char *)keypad_digits);
+      state_createAndSendPacket(MY_ID, "event", "code", "keypad", "noneA", "noneAT", (char *)keypad_digits);
       // clear the pad
       digit_count = 0;
       memset(keypad_digits, 0, sizeof(keypad_digits));
       playTimeoutSound = false;
-      //      tone(BUZZER_PIN, 1000);
-      //      delay(100); //Schedule these
-      //      noTone(BUZZER_PIN);
+      ledcWriteTone(channel, 3000);
+      buzzerDebounce = millis();
     }
     else
     {
-      //      tone(BUZZER_PIN, 500);
-      //      delay(100); //Schedule these
-      //      noTone(BUZZER_PIN);
+      ledcWriteTone(channel, 1000);
+      buzzerDebounce = millis();
     }
     return true;
   }
