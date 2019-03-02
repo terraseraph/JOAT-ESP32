@@ -231,19 +231,6 @@ void addNodeToList(uint32_t nodeId, String myId, String nodeType, String memory)
   }
 
   String nodeMeshId = String(nodeId); //convert node name to string
-  // if (!nodeList.containsKey(nodeMeshId))
-  // {
-  //   JsonObject &nodeObj = nodeList.createNestedObject(nodeMeshId);
-  //   nodeObj["id"] = myId;
-  //   nodeObj["type"] = nodeType;
-  //   nodeObj["mem"] = memory;
-  // }
-  // else
-  // {
-  //   nodeList[nodeMeshId]["id"] = myId;
-  //   nodeList[nodeMeshId]["type"] = nodeType;
-  //   nodeList[nodeMeshId]["mem"] = memory;
-  // }
   String msg = "{\"heartbeat\":{\"hardwareId\":" + nodeMeshId + ",\"id\":\"" + myId + "\",\"type\":\"" + nodeType + "\",\"memory\":\"" + memory + "\"}}";
   Serial.println(msg);
   if (MQTT_ENABLED)

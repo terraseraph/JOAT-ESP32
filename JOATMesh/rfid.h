@@ -2,7 +2,7 @@
 // Got info from:
 // https://www.instructables.com/id/ESP32-With-RFID-Access-Control/
 // This header controls the RFID functionality
-// SDA - 21
+// SDA - 5
 // SCK - 18
 // MOS - 23
 // MIS - 19
@@ -11,9 +11,9 @@
 // 3v3
 //==========================================
 
-#include <MFRC522.h> //library responsible for communicating with the module RFID-RC522
 #include <SPI.h>     //library responsible for communicating of SPI bus
-#define SS_PIN 21
+#include <MFRC522.h> //library responsible for communicating with the module RFID-RC522
+#define SS_PIN 5
 #define RST_PIN 22
 #define SIZE_BUFFER 18
 #define MAX_SIZE_BLOCK 16
@@ -26,12 +26,14 @@ MFRC522::MIFARE_Key key;
 //authentication return status code
 MFRC522::StatusCode status;
 // Defined pins to module RC522
+// MFRC522 mfrc522(SS_PIN, RST_PIN);
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 
 void rfidWritingData();
 void rfidReadingData();
 void toggleGreenPin();
 void toggleRedPin();
+void dump_byte_array(byte *buffer, byte bufferSize);
 
 Scheduler rdidScheduler;
 Task taskToggleRed(RELAY_TOGGLE_DELAY, 1, &toggleRedPin);
@@ -44,12 +46,13 @@ void rfid_init()
     rdidScheduler.addTask(taskToggleRed);
     rdidScheduler.addTask(taskToggleGreen);
 
-    SPI.begin(); // Init SPI bus
     pinMode(greenPin, OUTPUT);
     pinMode(redPin, OUTPUT);
-
+    // SPIClass SPI();
+    SPI.begin(); // Init SPI bus
     // Init MFRC522
     mfrc522.PCD_Init();
+    mfrc522.PCD_DumpVersionToSerial();
     Serial.println("Approach your reader card...");
     Serial.println();
 }
@@ -143,19 +146,29 @@ void rfidReadingData()
         taskToggleGreen.setIterations(1); //ensures the task re runs
         taskToggleGreen.enable();
     }
-
     Serial.print(F("\nData from block ["));
     Serial.print(block);
     Serial.print(F("]: "));
+    // Serial.println(&(mfrc522.uid));
 
     //prints read data
+    String cardId = "";
+    byte letter;
+    for (byte i = 0; i < mfrc522.uid.size; i++)
+    {
+        Serial.print(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
+        Serial.print(mfrc522.uid.uidByte[i], HEX);
+        cardId.concat(String(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " "));
+        cardId.concat(String(mfrc522.uid.uidByte[i], HEX));
+    }
     for (uint8_t i = 0; i < MAX_SIZE_BLOCK; i++)
     {
         Serial.write(buffer[i]);
     }
     Serial.println(" ");
-    const char *strBuffer = reinterpret_cast<const char*>(buffer);
-    state_createAndSendPacket(MY_ID, "event", "code", "rfid", "noneA", "noneAT", strBuffer);
+    const char *strBuffer = reinterpret_cast<const char *>(buffer);
+    // const char *strUid = reinterpret_cast<const char *>(&(mfrc522.uid));
+    state_createAndSendPacket(MY_ID, "event", "code", "rfid", "noneA", "noneAT", cardId.substring(1));
 }
 
 void rfidWritingData()

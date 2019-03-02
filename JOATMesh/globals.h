@@ -14,7 +14,7 @@ uint32_t BRIDGE_ID;
 
 int GLOBAL_PIN;
 String nodeName = "logNode"; // Name needs to be unique
-String MY_ID = "15";
+String MY_ID = "16";
 String NODE_TYPE;
 
 char *MY_ID_CHAR;
