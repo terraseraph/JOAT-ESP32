@@ -4,10 +4,10 @@
 /////////////////////////////
 #define MAG_PIN0 15
 #define MAG_PIN1 2
-#define MAG_PIN2 0
+#define MAG_PIN2 13
 #define MAG_PIN3 4
-#define MAG_PIN4 16
-#define MAG_PIN5 17
+#define MAG_PIN4 12
+#define MAG_PIN5 14
 #define MAG_PIN6 5
 #define MAG_PIN7 18
 #define MAG_PIN8 19
@@ -141,4 +141,3 @@ String intToStringArray(int int_array[], int size_of_array)
   }
   return "[" + returnstring + "]";
 }
-

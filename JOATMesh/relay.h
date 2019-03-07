@@ -3,8 +3,12 @@
 // Note:
 // For 8 channel relay - Cannot power from esp32 alone
 // Relay VCC & GND -> 5V external supply
-// COM -> ESP32 3v3
+// COM -> ESP32 3v3/Vin
 // Pins then corrospond.
+//
+// Alternate 8 channel relay
+// relay Jvcc & gnd -> external supply
+// vcc & pins -> esp32
 //////////////////////////////
 #include "HardwareSerial.h"
 
