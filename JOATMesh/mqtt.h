@@ -34,7 +34,7 @@ void mqtt_init()
     }
 
     // IPAddress mqttBroker(MQTT_BROKER_ADDRESS[0], MQTT_BROKER_ADDRESS[1], MQTT_BROKER_ADDRESS[2], MQTT_BROKER_ADDRESS[3]);
-    IPAddress mqttBroker(192, 168, 0, 180);
+    IPAddress mqttBroker(tempMqttAddr[0], tempMqttAddr[1], tempMqttAddr[2], tempMqttAddr[3]);
 
     Serial.print("Mqtt broker address:");
     Serial.print(mqttBroker);
@@ -234,7 +234,9 @@ void asyncMqttSetup()
     mqttReconnectTimer = xTimerCreate("mqttTimer", pdMS_TO_TICKS(2000), pdFALSE, (void *)0, reinterpret_cast<TimerCallbackFunction_t>(connectToMqtt));
     wifiReconnectTimer = xTimerCreate("wifiTimer", pdMS_TO_TICKS(2000), pdFALSE, (void *)0, reinterpret_cast<TimerCallbackFunction_t>(connectToWifi));
 
-    IPAddress mqttBroker(192, 168, 0, 180);
+    IPAddress mqttBroker(tempMqttAddr[0], tempMqttAddr[1], tempMqttAddr[2], tempMqttAddr[3]);
+    // IPAddress mqttBroker(MQTT_BROKER_ADDRESS[0], MQTT_BROKER_ADDRESS[1], MQTT_BROKER_ADDRESS[2], MQTT_BROKER_ADDRESS[3]);
+
     mqttClient.onConnect(onMqttConnect);
     mqttClient.onDisconnect(onMqttDisconnect);
     mqttClient.onSubscribe(onMqttSubscribe);

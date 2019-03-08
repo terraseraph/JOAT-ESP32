@@ -145,8 +145,6 @@ void setBrokerAddress(int ipAddress[])
   EEPROM.commit();
 }
 
-
-
 void getMqttBrokerAddress()
 {
   int addr[4];
@@ -159,4 +157,8 @@ void getMqttBrokerAddress()
   tempMqttAddr[1] = addr[1];
   tempMqttAddr[2] = addr[2];
   tempMqttAddr[3] = addr[3];
+  // MQTT_BROKER_ADDRESS[0] = addr[0];
+  // MQTT_BROKER_ADDRESS[1] = addr[1];
+  // MQTT_BROKER_ADDRESS[2] = addr[2];
+  // MQTT_BROKER_ADDRESS[3] = addr[3];
 }

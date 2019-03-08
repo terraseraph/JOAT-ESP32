@@ -4,7 +4,7 @@
 #define MESH_PASSWORD "somepassword"
 #define MESH_PORT 5555
 
-#define STATION_SSID "someNetwork"
+#define STATION_SSID "cerberus"
 #define STATION_PASSWORD "somepassword"
 
 #define HOSTNAME "JoatServer"

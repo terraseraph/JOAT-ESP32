@@ -212,6 +212,15 @@ void cmd_branchAddress(JsonObject &cmd)
   cmd_addr[2] = command_message_address[2]; // 0
   cmd_addr[3] = command_message_address[3]; // 50
   setBrokerAddress(cmd_addr);
+  Serial.println("Setting ip to:");
+  Serial.print(cmd_addr[0]);
+  Serial.print(".");
+  Serial.print(cmd_addr[1]);
+  Serial.print(".");
+  Serial.print(cmd_addr[2]);
+  Serial.print(".");
+  Serial.println(cmd_addr[3]);
+
   ESP.restart();
 }
 
