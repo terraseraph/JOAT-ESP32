@@ -78,6 +78,17 @@ void state_parsePacket(JsonObject &root)
       int data = root["state"]["message"]["data"];
       processRelayAction(state_message_action, data);
     }
+    else if (strcmp(state_message_actionType, "mp3") == 0)
+    {
+      String pData = root["state"]["message"]["data"];
+      DynamicJsonBuffer tempBuffer;
+      JsonObject &dat = tempBuffer.parseObject(pData);
+      uint8_t zero = 0;
+      String action = root["state"]["message"]["action"];
+      uint8_t folderId = dat["folder"] | zero;
+      uint8_t fileId = dat["file"] | zero;
+      processMp3Action(action, folderId, fileId);
+    }
     else //goes to serial
     {
       String msg;

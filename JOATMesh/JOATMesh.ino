@@ -13,11 +13,12 @@
 #include <Arduino.h>
 
 #include <painlessMesh.h>
-
-#include "LinkedList.h"
+#include <HardwareSerial.h>
+#include "libs/LinkedList.h"
 #include "globals.h"
 #include "joatEEPROM.h"
 #include "commands.h"
+#include "mp3Player.h"
 #include "stateEventAction.h"
 #include "webServer.h"
 #include "mqtt.h"
@@ -110,6 +111,10 @@ void startupInitType()
   {
     rfid_init();
   };
+  if (NODE_TYPE == "mp3")
+  {
+    MP3_init();
+  };
   if (NODE_TYPE == "bridge")
   {
     bridge_init();
@@ -146,6 +151,10 @@ void processEventLoop()
   {
     rdidScheduler.execute(); //for relay delays
     processRfid();
+  };
+  if (NODE_TYPE == "mp3")
+  {
+    processMp3Loop();
   };
   if (NODE_TYPE != "bridge") //run heartbeat if not the bridge
   {

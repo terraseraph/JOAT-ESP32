@@ -241,7 +241,8 @@ bool validateFunctionChange(String msg)
       msg == "reedSwitch" ||
       msg == "magSwitch" ||
       msg == "rfid" ||
-      msg == "button")
+      msg == "button" ||
+      msg == "mp3")
   {
     return true;
   }

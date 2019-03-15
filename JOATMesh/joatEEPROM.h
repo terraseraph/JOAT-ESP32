@@ -12,6 +12,7 @@ EEPROMClass EENODETYPE("eeprom1", 0x500);
 #define TYPE_KEYPAD 3
 #define TYPE_MAGSWITCH 4
 #define TYPE_RFID 5
+#define TYPE_MP3 6
 #define TYPE_UNSET 255
 
 #define NODE_TYPE_START 0
@@ -85,6 +86,10 @@ void setNodeType(String type)
   {
     val = TYPE_RFID;
   };
+  if (type == "mp3")
+  {
+    val = TYPE_MP3;
+  };
   if (type == "bridge")
   {
     val = TYPE_BRIDGE;
@@ -126,6 +131,10 @@ String getNodeType()
   if (type == TYPE_RFID)
   {
     nt = "rfid";
+  };
+  if (type == TYPE_MP3)
+  {
+    nt = "mp3";
   };
   if (type == TYPE_BRIDGE)
   {

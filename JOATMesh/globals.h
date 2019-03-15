@@ -4,8 +4,8 @@
 #define MESH_PASSWORD "somepassword"
 #define MESH_PORT 5555
 
-#define STATION_SSID "cerberus"
-#define STATION_PASSWORD "somepassword"
+#define STATION_SSID "SSID"
+#define STATION_PASSWORD "somePassword"
 
 #define HOSTNAME "JoatServer"
 #define MQTTENABLE
@@ -14,7 +14,7 @@ uint32_t BRIDGE_ID;
 
 int GLOBAL_PIN;
 String nodeName = "logNode"; // Name needs to be unique
-String MY_ID = "16";
+String MY_ID = "17";
 String NODE_TYPE;
 
 char *MY_ID_CHAR;
@@ -40,7 +40,8 @@ uint32_t getNodeHardwareId(String id);
 
 char *IPAddressToString(uint8_t ip); //webServer
 
-void processRelayAction(String action, int pinNo); //relay
+void processRelayAction(String action, int pinNo);                      //relay
+void processMp3Action(String action, uint8_t folderId, uint8_t fileId); //mp3
 
 void mqttCallback(char *topic, byte *payload, unsigned int length); // mqtt
 void sendMqttPacket(String packet);                                 //mqtt
