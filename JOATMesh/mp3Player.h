@@ -1,3 +1,6 @@
+// Most of the logic:
+// https://github.com/cefaloide/ArduinoSerialMP3Player/blob/master/ArduinoSerialMP3Player/ArduinoSerialMP3Player.ino
+// https://github.com/terraseraph/seraphim-escape-arduino-joat/blob/master/JOAT/MP3.cpp
 
 #define MP3_BAUD_RATE 9600
 #define MP3_START_CMD 0x7E
@@ -5,7 +8,6 @@
 #define MP3_END_CMD 0xEF
 #define MP3_RX 16
 #define MP3_TX 17
-// #include <SoftwareSerial.h>
 
 void MP3_init();
 void MP3_Reset();

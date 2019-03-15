@@ -72,7 +72,6 @@ void state_parsePacket(JsonObject &root)
   {
     Serial.println("Packet for me");
     Serial.println(state_message_actionType);
-    // if (state_message_actionType == "relay")
     if (strcmp(state_message_actionType, "relay") == 0)
     {
       int data = root["state"]["message"]["data"];
