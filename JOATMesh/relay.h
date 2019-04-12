@@ -21,7 +21,7 @@
 #define REL_PIN7 12
 #define REL_PIN8 13
 
-#define RELAY_TOGGLE_DELAY 100
+#define RELAY_TOGGLE_DELAY 300
 
 void relayToggleOff();
 void relayToggleOn();

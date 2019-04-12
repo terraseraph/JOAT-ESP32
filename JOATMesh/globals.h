@@ -14,12 +14,12 @@ uint32_t BRIDGE_ID;
 
 int GLOBAL_PIN;
 String nodeName = "logNode"; // Name needs to be unique
-String MY_ID = "17";
+String MY_ID = "12";
 String NODE_TYPE;
 
 char *MY_ID_CHAR;
 
-int MQTT_BROKER_ADDRESS[4] = {192, 168, 0, 180};
+int MQTT_BROKER_ADDRESS[4] = {192, 168, 0, 51};
 int MQTT_BROKER_PORT = 1883;
 const char *MQTT_TOPIC = "root";
 bool MQTT_ENABLED = true;

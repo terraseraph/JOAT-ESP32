@@ -236,7 +236,7 @@ void asyncMqttSetup()
 
     IPAddress mqttBroker(tempMqttAddr[0], tempMqttAddr[1], tempMqttAddr[2], tempMqttAddr[3]);
     // IPAddress mqttBroker(MQTT_BROKER_ADDRESS[0], MQTT_BROKER_ADDRESS[1], MQTT_BROKER_ADDRESS[2], MQTT_BROKER_ADDRESS[3]);
-
+    char *clientId = const_cast<char *>(MY_ID.c_str());
     mqttClient.onConnect(onMqttConnect);
     mqttClient.onDisconnect(onMqttDisconnect);
     mqttClient.onSubscribe(onMqttSubscribe);
@@ -244,6 +244,6 @@ void asyncMqttSetup()
     mqttClient.onMessage(onMqttMessage);
     mqttClient.onPublish(onMqttPublish);
     mqttClient.setServer(mqttBroker, MQTT_BROKER_PORT);
-    mqttClient.setClientId(string2char(MY_ID));
+    mqttClient.setClientId(clientId);
     mqttClient.setMaxTopicLength(1024);
 }
