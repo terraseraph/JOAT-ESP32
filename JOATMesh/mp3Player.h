@@ -61,6 +61,13 @@ void processMp3Loop()
 
 void processMp3Action(String action, uint8_t folderId, uint8_t fileId)
 {
+    Serial.print("MP3 action : ");
+    Serial.print(action);
+    Serial.print(" : ");
+    Serial.print(folderId);
+    Serial.print(" : ");
+    Serial.print(fileId);
+
     if (action == "play")
     {
         MP3_PlayWithFolderFilename(folderId, fileId);

@@ -1,7 +1,7 @@
 //prototypes
 void state_createAndSendPacket(String fromId, String type, String event, String eventType, String action, String actionType, String data);
-void state_parsePacket(JsonObject &root);
-void state_forwardPacketToMesh(JsonObject &root, String toId);
+void state_parsePacket(JsonObject root);
+void state_forwardPacketToMesh(JsonObject root, String toId);
 // ===================================================
 // =========== Create State Packets to send ==========
 // ===================================================
@@ -13,10 +13,10 @@ void state_forwardPacketToMesh(JsonObject &root, String toId);
  */
 void state_createAndSendPacket(String fromId, String type, String event, String eventType, String action, String actionType, String data)
 {
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject &root = jsonBuffer.createObject();
-  JsonObject &state = root.createNestedObject("state");
-  JsonObject &state_message = state.createNestedObject("message");
+  DynamicJsonDocument root(1024);
+  // JsonObject &root = jsonBuffer.createObject();
+  JsonObject state = root.createNestedObject("state");
+  JsonObject state_message = state.createNestedObject("message");
 
   // ensure action and events are correct for opposing states
   if (type == "event")
@@ -41,7 +41,8 @@ void state_createAndSendPacket(String fromId, String type, String event, String 
   state_message["data"] = data;
 
   String buffer;
-  root.printTo(buffer);
+  // root.printTo(buffer);
+  serializeJson(root, buffer);
   mesh.sendSingle(BRIDGE_ID, buffer);
   return;
 }
@@ -55,11 +56,11 @@ void state_createAndSendPacket(String fromId, String type, String event, String 
  * uses new standard
  * 
  */
-void state_parsePacket(JsonObject &root)
+void state_parsePacket(JsonObject root)
 {
   // process data when the action type is known
   const char *state_type = root["state"]["type"]; // "action"
-  JsonObject &state_message = root["state"]["message"];
+  JsonObject state_message = root["state"]["message"];
   const char *state_message_toId = state_message["toId"];
   const char *state_message_wait = state_message["wait"];
   const char *state_message_event = state_message["event"];
@@ -80,18 +81,24 @@ void state_parsePacket(JsonObject &root)
     else if (strcmp(state_message_actionType, "mp3") == 0)
     {
       String pData = root["state"]["message"]["data"];
-      DynamicJsonBuffer tempBuffer;
-      JsonObject &dat = tempBuffer.parseObject(pData);
+      DynamicJsonDocument jsonObject(1024);
+      deserializeJson(jsonObject, pData);
+      JsonObject dat = jsonObject.as<JsonObject>();
+      // JsonObject dat = tempBuffer.parseObject(pData);
       uint8_t zero = 0;
       String action = root["state"]["message"]["action"];
       uint8_t folderId = dat["folder"] | zero;
       uint8_t fileId = dat["file"] | zero;
       processMp3Action(action, folderId, fileId);
     }
+    //============= CUSTOM =============
+
+    //==================================
     else //goes to serial
     {
       String msg;
-      root.printTo(msg);
+      // root.printTo(msg);
+      serializeJson(root, msg);
       Serial.println(msg);
     }
   }

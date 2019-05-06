@@ -21,7 +21,7 @@
 #define REL_PIN7 12
 #define REL_PIN8 13
 
-#define RELAY_TOGGLE_DELAY 300
+#define RELAY_TOGGLE_DELAY 150
 
 void relayToggleOff();
 void relayToggleOn();
@@ -110,15 +110,27 @@ void processRelayAction(String action, int pinNo)
     {
       digitalWrite(pinNo, LOW);
       toggleOn.setIterations(1); //ensures the task re runs
-      toggleOn.enable();
+      toggleOn.enableDelayed(RELAY_TOGGLE_DELAY);
     }
     else
     {
       digitalWrite(pinNo, HIGH);
       toggleOff.setIterations(1);
-      toggleOff.enable();
+      toggleOff.enableDelayed(RELAY_TOGGLE_DELAY);
     }
 
     Serial.printf("Relay toggle");
+  }
+  if (action == "toggleOnOff")
+  {
+    digitalWrite(pinNo, HIGH);
+    toggleOff.setIterations(1);
+    toggleOff.enableDelayed(RELAY_TOGGLE_DELAY);
+  }
+  if (action == "toggleOffOn")
+  {
+    digitalWrite(pinNo, LOW);
+    toggleOn.setIterations(1);
+    toggleOn.enableDelayed(RELAY_TOGGLE_DELAY);
   }
 }

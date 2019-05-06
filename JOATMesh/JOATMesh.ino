@@ -27,6 +27,8 @@
 #include "button.h"
 #include "magSwitch.h"
 #include "rfid.h"
+//------ Custom ------//
+#include "custom/phone.h"
 
 String inputString = ""; //for serial input
 
@@ -115,6 +117,12 @@ void startupInitType()
   {
     MP3_init();
   };
+  //======= Custom ====================//
+  if (NODE_TYPE == "phone")
+  {
+    phone_init();
+  };
+  //==================================//
   if (NODE_TYPE == "bridge")
   {
     bridge_init();
@@ -156,6 +164,12 @@ void processEventLoop()
   {
     processMp3Loop();
   };
+  //======= Custom ====================//
+  if (NODE_TYPE == "phone")
+  {
+    processPhoneLoop();
+  };
+  //==================================//
   if (NODE_TYPE != "bridge") //run heartbeat if not the bridge
   {
     scheduler.execute();
@@ -314,11 +328,13 @@ void preparePacketForMesh(uint32_t from, String &msg)
 {
   // Saving logServer
   Serial.println("Perparing packet");
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject &root = jsonBuffer.parseObject(msg);
+  DynamicJsonDocument jsonBuffer(1024);
+  deserializeJson(jsonBuffer, msg);
+  JsonObject root = jsonBuffer.as<JsonObject>();
   String buffer;
-  root.printTo(buffer);
-  if (root.success())
+  // root.printTo(buffer);
+  serializeJson(root, buffer);
+  if (!root.isNull())
   {
 
     if (root.containsKey("query"))
@@ -375,9 +391,9 @@ void preparePacketForMesh(uint32_t from, String &msg)
 //==================================//
 void taskPrepareHeartbeat()
 {
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject &root = jsonBuffer.createObject();
-  JsonObject &heartbeat = root.createNestedObject("heartbeat");
+  DynamicJsonDocument root(1024);
+  // JsonObject &root = jsonBuffer.createObject();
+  JsonObject heartbeat = root.createNestedObject("heartbeat");
 
   String hwId = String(mesh.getNodeId());
   String mem = String(ESP.getFreeHeap());
@@ -387,7 +403,8 @@ void taskPrepareHeartbeat()
   heartbeat["type"] = NODE_TYPE;
   heartbeat["memory"] = mem;
 
-  root.printTo(msgBuffer);
+  // root.printTo(msgBuffer);
+  serializeJson(root, msgBuffer);
   Serial.println("====Sending heartbeat to: " + String(BRIDGE_ID) + "=====");
   Serial.println(msgBuffer);
   mesh.sendSingle(BRIDGE_ID, msgBuffer);
@@ -426,12 +443,15 @@ void parseReceivedPacket(uint32_t from, String msg)
 {
   Serial.println("==== parsing Received packet =======");
 
-  DynamicJsonBuffer jsonBuffer;
-  JsonObject &root = jsonBuffer.parseObject(msg);
+  DynamicJsonDocument jsonBuffer(1024);
+  // JsonObject &root = jsonBuffer.parseObject(msg);
+  deserializeJson(jsonBuffer, msg);
+  JsonObject root = jsonBuffer.as<JsonObject>();
   String serialBuffer;
-  root.printTo(serialBuffer);
+  // root.printTo(serialBuffer);
+  serializeJson(root, serialBuffer);
   Serial.println(serialBuffer);
-  if (root.success())
+  if (!root.isNull())
   {
 
     if (root.containsKey("command") && (root["toId"] == MY_ID || root["toId"] == String(mesh.getNodeId())))

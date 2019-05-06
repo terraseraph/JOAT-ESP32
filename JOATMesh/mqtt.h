@@ -112,14 +112,15 @@ char *string2char(String command)
 
 String createMqttConnectionPacket()
 {
-    DynamicJsonBuffer jsonBuffer;
-    JsonObject &root = jsonBuffer.createObject();
+    DynamicJsonDocument root(1024);
+    // JsonObject &root = jsonBuffer.createObject();
     root["JOAT_CONNECT"] = true;
     root["id"] = MY_ID;
     root["ipAddress"] = mqttMyIP.toString();
     root["name"] = MY_ID;
     String msg;
-    root.printTo(msg);
+    // root.printTo(msg);
+    serializeJson(root, msg);
 
     return msg;
 }

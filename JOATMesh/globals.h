@@ -14,7 +14,7 @@ uint32_t BRIDGE_ID;
 
 int GLOBAL_PIN;
 String nodeName = "logNode"; // Name needs to be unique
-String MY_ID = "12";
+String MY_ID = "50";
 String NODE_TYPE;
 
 char *MY_ID_CHAR;
@@ -47,8 +47,9 @@ void mqttCallback(char *topic, byte *payload, unsigned int length); // mqtt
 void sendMqttPacket(String packet);                                 //mqtt
 
 //Json objects
-DynamicJsonBuffer jsonNodeListBuffer;
-JsonObject &nodeList = jsonNodeListBuffer.createObject();
+// DynamicJsonDocument jsonNodeListBuffer(1024);
+DynamicJsonDocument nodeList(1024);
+// JsonObject &nodeList = jsonNodeListBuffer.createObject();
 
 char *getMyIdChar()
 {
