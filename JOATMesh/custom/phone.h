@@ -59,23 +59,12 @@ bool processPhoneLoop()
         {
             playPhoneTone();
         };
-        if (keypad_getDigitCount() == PHONE_KEYPAD_DIGITS)
+
+        //if the keypad has sent a message
+        if (keypad_hasMessageSent())
         {
             playCallingTone();
         }
-
-        // if (!playingHookTone)
-        // {
-        //     if (onHook)
-        //     {
-        //         Serial.println("==== Phone off hook ====");
-        //         playOffHookTone();
-        //         playingHookTone = true;
-        //         onHook = false;
-        //         keypad_enableProcessLoop();
-        //         enableTones = true;
-        //     }
-        // }
     }
     else
     {
@@ -86,13 +75,6 @@ bool processPhoneLoop()
             stopOffHookTone();
             onHook = true;
         }
-        //         Serial.println("==== Phone on hook ====");
-        //         keypad_disableProcessLoop();
-        //         stopOffHookTone();
-        //         playingHookTone = false;
-        //         enableTones = false;
-        //         onHook = true;
-        //     }
     }
 }
 

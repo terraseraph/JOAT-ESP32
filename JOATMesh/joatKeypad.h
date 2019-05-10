@@ -33,6 +33,7 @@ void keypad_disableProcessLoop();
 void keypad_setDebounceTime(uint time);
 void keypad_resetDigits();
 uint8_t keypad_getDigitCount();
+bool keypad_hasMessageSent();
 
 int KEYPAD_DIGITS = 6; //Amount of digits till it sends packet
 int keypad_timeout;
@@ -42,6 +43,7 @@ uint8_t digit_count = 0;
 uint8_t keypad_digits[11]; // number of digits to send, i.e pin number
 bool playTimeoutSound = false;
 bool enableKeypadProcess = true;
+bool keypad_messgaeSent = false;
 
 //Buzzer
 int freq = 2000;
@@ -114,6 +116,7 @@ void keypad_custom_init(char *keymap, byte *rowPins, byte *colPins, byte numberO
 
 bool ProcessKeyPad()
 {
+  keypad_messgaeSent = false;
   char key = _keypad->getKey();
   processBuzzer();
 
@@ -137,6 +140,7 @@ bool ProcessKeyPad()
     {
       Serial.println("== sending packet ===");
       state_createAndSendPacket(MY_ID, "event", "code", "keypad", "noneA", "noneAT", (char *)keypad_digits);
+      keypad_messgaeSent = true;
       // clear the pad
       keypad_resetDigits();
       playTimeoutSound = false;
@@ -221,4 +225,15 @@ void keypad_setDebounceTime(uint time)
 uint8_t keypad_getDigitCount()
 {
   return digit_count;
+}
+
+bool keypad_hasMessageSent()
+{
+  bool result = false;
+  if (keypad_messgaeSent)
+  {
+    result = true;
+  }
+  keypad_messgaeSent = false;
+  return result;
 }
