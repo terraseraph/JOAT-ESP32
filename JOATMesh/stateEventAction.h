@@ -67,9 +67,12 @@ void state_parsePacket(JsonObject root)
   const char *state_message_eventType = state_message["eventType"];
   const char *state_message_action = state_message["action"];
   const char *state_message_actionType = state_message["actionType"];
+  int intId = root["toId"];
+  String strId = root["toId"];
 
   //Switch data type depending on action to be completed
-  if (root["toId"] == MY_ID || root["toId"] == String(mesh.getNodeId()))
+  // if (root["toId"] == MY_ID || root["toId"] == String(mesh.getNodeId()))
+  if (strId == MY_ID || root["toId"] == String(mesh.getNodeId()) || String(intId) == MY_ID)
   {
     Serial.println("Packet for me");
     Serial.println(state_message_actionType);
@@ -80,15 +83,32 @@ void state_parsePacket(JsonObject root)
     }
     else if (strcmp(state_message_actionType, "mp3") == 0)
     {
-      String pData = root["state"]["message"]["data"];
-      DynamicJsonDocument jsonObject(1024);
-      deserializeJson(jsonObject, pData);
-      JsonObject dat = jsonObject.as<JsonObject>();
+      // String pData = root["state"]["message"]["data"];
+      // DynamicJsonDocument jsonObject(1024);
+      // deserializeJson(jsonObject, pData);
+      // JsonObject dat = jsonObject.as<JsonObject>();
+
+      // JsonArray datArray = root["state"]["message"]["data"];
+
       // JsonObject dat = tempBuffer.parseObject(pData);
-      uint8_t zero = 0;
+      uint8_t invalid = -1;
       String action = root["state"]["message"]["action"];
-      uint8_t folderId = dat["folder"] | zero;
-      uint8_t fileId = dat["file"] | zero;
+
+      uint8_t folderId = root["state"]["message"]["data"][0] | invalid;
+      uint8_t fileId = root["state"]["message"]["data"][1] | invalid;
+
+      if (folderId == invalid && fileId == invalid)
+      {
+        const size_t CAPACITY = JSON_ARRAY_SIZE(3);
+        String arrStr = root["state"]["message"]["data"];
+        StaticJsonDocument<CAPACITY> doc;
+        deserializeJson(doc, arrStr);
+        JsonArray arr = doc.as<JsonArray>();
+        folderId = arr[0];
+        fileId = arr[1];
+      }
+      // uint8_t folderId = dat["folder"] | invalid;
+      // uint8_t fileId = dat["file"] | invalid;
       processMp3Action(action, folderId, fileId);
     }
     //============= CUSTOM =============

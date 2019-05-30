@@ -215,6 +215,7 @@ void keypad_resetDigits()
 {
   digit_count = 0;
   memset(keypad_digits, 0, sizeof(keypad_digits));
+  keypad_messgaeSent = false;
 }
 
 void keypad_setDebounceTime(uint time)
