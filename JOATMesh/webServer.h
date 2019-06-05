@@ -51,7 +51,7 @@ void webServer_init()
     server.on("/nodes", HTTP_GET, [](AsyncWebServerRequest *request) {
         String list;
         // nodeList.printTo(list);
-        serializeJson(nodeList, list);
+        // serializeJson(nodeList, list);
         request->send(200, "text/html", "{\"nodes\":[ " + list + "]}");
     });
 

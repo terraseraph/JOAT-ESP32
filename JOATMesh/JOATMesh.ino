@@ -10,10 +10,12 @@
 // https://randomnerdtutorials.com/esp32-pinout-reference-gpios/ <- for the pins
 //************************************************************
 // #define ESP32
+#define ARDUINOJSON_ENABLE_STD_STRING 1
 #include <Arduino.h>
 
 #include <painlessMesh.h>
 #include <HardwareSerial.h>
+#include "ota.h"
 #include "libs/LinkedList.h"
 #include "globals.h"
 #include "joatEEPROM.h"
@@ -282,7 +284,7 @@ void printNodeList()
 
 void removeNodeFromList(String nodeName)
 {
-  nodeList.remove(nodeName);
+  // nodeList.remove(nodeName);
 }
 
 //==============================//
@@ -328,7 +330,7 @@ void preparePacketForMesh(uint32_t from, String &msg)
 {
   // Saving logServer
   Serial.println("Perparing packet");
-  DynamicJsonDocument jsonBuffer(1024);
+  DynamicJsonDocument jsonBuffer(sizeof(msg) + 100);
   deserializeJson(jsonBuffer, msg);
   JsonObject root = jsonBuffer.as<JsonObject>();
   String buffer;
@@ -443,7 +445,7 @@ void parseReceivedPacket(uint32_t from, String msg)
 {
   Serial.println("==== parsing Received packet =======");
 
-  DynamicJsonDocument jsonBuffer(1024);
+  DynamicJsonDocument jsonBuffer(sizeof(msg) + 100);
   // JsonObject &root = jsonBuffer.parseObject(msg);
   deserializeJson(jsonBuffer, msg);
   JsonObject root = jsonBuffer.as<JsonObject>();

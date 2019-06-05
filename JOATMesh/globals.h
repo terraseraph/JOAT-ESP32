@@ -29,6 +29,20 @@ bool HTTP_ENABLED = true;
 Scheduler scheduler; //scheduler
 painlessMesh mesh;   // mesh
 
+struct DEVICE
+{
+    String HARDWARE = "ESP32";
+    String NODE_TYPE = "update";
+    String MY_ID = "50";
+    String BRIDGE_ID = "10";
+    String SSID;
+    String PASSWORD;
+    String md5;
+    int BROKER_ADDRESS[4];
+    size_t noPart;
+    size_t partNo = 0;
+};
+
 //Prototypes
 void createJsonPacket(String fromId, String event, String eventType, String action, String actionType, String data);
 void preparePacketForMesh(uint32_t from, String &msg);
@@ -48,7 +62,7 @@ void sendMqttPacket(String packet);                                 //mqtt
 
 //Json objects
 // DynamicJsonDocument jsonNodeListBuffer(1024);
-DynamicJsonDocument nodeList(1024);
+// DynamicJsonDocument nodeList(1024);
 // JsonObject &nodeList = jsonNodeListBuffer.createObject();
 
 char *getMyIdChar()

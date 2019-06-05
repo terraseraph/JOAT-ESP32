@@ -36,6 +36,7 @@ void cmd_setName(JsonObject cmd);
 void cmd_branchAddress(JsonObject cmd);
 void cmd_mqttMode(JsonObject cmd);
 bool validateFunctionChange(String msg);
+void cmd_otaUpdate(JsonObject cmd);
 
 //==============================//
 //=====Parse Command ==========//
@@ -75,6 +76,10 @@ void cmd_parseCommand(JsonObject root)
   if (command["type"] == "mqttMode")
   {
     cmd_mqttMode(command);
+  }
+  if (command["type"] == "ota")
+  {
+    cmd_otaUpdate(command);
   }
 }
 
@@ -227,6 +232,11 @@ void cmd_branchAddress(JsonObject cmd)
 
 void cmd_mqttMode(JsonObject cmd)
 {
+}
+
+void cmd_otaUpdate(JsonObject cmd)
+{
+  otaReceiveUpdate(cmd);
 }
 
 /**

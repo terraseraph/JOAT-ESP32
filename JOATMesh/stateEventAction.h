@@ -13,7 +13,7 @@ void state_forwardPacketToMesh(JsonObject root, String toId);
  */
 void state_createAndSendPacket(String fromId, String type, String event, String eventType, String action, String actionType, String data)
 {
-  DynamicJsonDocument root(1024);
+  DynamicJsonDocument root(2048);
   // JsonObject &root = jsonBuffer.createObject();
   JsonObject state = root.createNestedObject("state");
   JsonObject state_message = state.createNestedObject("message");
