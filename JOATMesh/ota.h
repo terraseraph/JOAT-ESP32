@@ -1,3 +1,16 @@
+/**
+ * EXAMPLE OTA: 
+ *  {"command" : {
+      "type" : "ota",
+      "message" : {
+        "data": "<massive base64 string>"
+      }
+    },
+      "toId" : "10"}
+ * 
+ * 
+ */
+
 #include <Update.h>
 #include <SPIFFS.h>
 #include "base64.h"

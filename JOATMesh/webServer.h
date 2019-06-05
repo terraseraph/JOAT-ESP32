@@ -60,6 +60,24 @@ void webServer_init()
         request->send(200, "text/html", "{\"memory\":" + mem + "}");
     });
 
+    server.on(
+        "/post",
+        HTTP_POST,
+        [](AsyncWebServerRequest *request) {},
+        NULL,
+        [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+            for (size_t i = 0; i < len; i++)
+            {
+                Serial.write(data[i]);
+            }
+            String body = (char *)data;
+            preparePacketForMesh(0, body);
+
+            Serial.println();
+
+            request->send(200);
+        });
+
     server.begin();
 }
 
