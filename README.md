@@ -5,13 +5,13 @@
 ---
 
     Sending a message to the branch server to forward to a node device
-    
+
     {
     	"id":"10",
     	"message": {--state/command--}
     }
-    
-    
+
+
     //===================================
     {
     	"toId" : "10",
@@ -21,24 +21,23 @@
     		"message" : "keypad"
     	}
     }
-    
+
     {"command" : {
     	"type" : "admin",
     	"to_id": "1",
     	"message" : "getMeshNodes"
     },
     	"toId" : "10"}
-    
+
     {"command" : {
     	"type" : "setId",
     	"toId": "10",
     	"message" : "11"
     },
     	"toId" : "10"}
-    
-    
+
+
     //=========================================
-    //Yet to implement
     {"command" : {
     	"type" : "branchAddress",
     	"message" : {
@@ -47,20 +46,20 @@
     	}
     },
     	"toId" : "10"}
-    
-    
+
+
     {"command" : {
     	"type" : "mqtt",
     	"message" : "enable"
     },
     	"toId" : "10"}
-    
+
     {"command" : {
     	"type" : "name",
     	"message" : "new name to have or just use the id"
     },
     	"toId" : "10"}
-    
+
     //=========================================
     Event/Action packet
     {
@@ -84,17 +83,17 @@
 The JOATESP32 uses many different libs these are:
 
 - painlessMesh
-    - ArduinoJSon
-    - AsyncTCP
-    - TaskScheduler
+  - ArduinoJSon
+  - AsyncTCP
+  - TaskScheduler
 - LinkedList
-    - Note: Painless mesh uses an older intergrated version of this, therefore there is an updated version with renamed members in the repo.
+  - Note: Painless mesh uses an older intergrated version of this, therefore there is an updated version with renamed members in the repo.
 - MFRC522
-    - This is used for the RFID
+  - This is used for the RFID
 - ESPAsyncWebServer
-    - Used for the web server
+  - Used for the web server
 - AsyncMqttClient
-    - Used for mqtt messaging in a non blocking capacity
+  - Used for mqtt messaging in a non blocking capacity
 
 # EEPROM settings
 
@@ -118,7 +117,7 @@ Add the arduino debugging lib and tools (TODO)
 
 # Relay Config(ESP32)
 
-#define REL_PIN1 15 
+#define REL_PIN1 15
 
 #define REL_PIN2 2
 
@@ -217,18 +216,18 @@ the data returned = [1,1,1,1,0,0,0,0,0,0]
 - MOSI = 23
 - RST = 22
 
-    {
-    	"toId":"10",
-      "state": {
-        "type": "action",
-        "message": {
-          "toId": "11",
-          "event": "code",
-          "eventType": "rfid",
-          "data": "1A 23 4B"
-        }
-      }
-    }
+  {
+  "toId":"10",
+  "state": {
+  "type": "action",
+  "message": {
+  "toId": "11",
+  "event": "code",
+  "eventType": "rfid",
+  "data": "1A 23 4B"
+  }
+  }
+  }
 
 # Keypad Config(ESP32)
 
@@ -240,6 +239,24 @@ the data returned = [1,1,1,1,0,0,0,0,0,0]
 #define LEFT_PIN6 14
 #define LEFT_PIN7 12
 #define LEFT_PIN8 13
+
+============ New layout =======
+
+#define LEFT_PIN1 15 // Left pin on keyp pad pin1
+
+#define LEFT_PIN2 2
+
+#define LEFT_PIN3 4
+
+#define LEFT_PIN4 5
+
+#define LEFT_PIN5 18
+
+#define LEFT_PIN6 19
+
+#define LEFT_PIN7 21
+
+#define LEFT_PIN8 23
 
 Key pad has optional buzzer on pin 6
 
@@ -283,15 +300,14 @@ Key pad has optional buzzer on pin 6
         }
       }
     }
-    
 
 ## Event/Event Types
 
-[Events](./Events-2e4cf37b-2b6a-4e1d-a7c3-0d62d727dfe6.csv)
+[Events](https://www.notion.so/585ed7d423d2476b918542a9558e230b)
 
 ## Action/ActionTypes
 
-[Actions](./Actions-25bdd862-267f-4a23-b890-0c236e2897f5.csv)
+[Actions](https://www.notion.so/91dbbbb3c0cd47268d9d9248f2cfe885)
 
 ## Event Example
 

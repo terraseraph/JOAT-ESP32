@@ -9,7 +9,7 @@
 //
 // https://randomnerdtutorials.com/esp32-pinout-reference-gpios/ <- for the pins
 //************************************************************
-
+// #define ESP32
 #include <Arduino.h>
 
 #include <painlessMesh.h>
