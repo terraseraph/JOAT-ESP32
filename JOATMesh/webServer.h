@@ -11,6 +11,8 @@ IPAddress myAPIP(0, 0, 0, 0);
 AsyncWebSocket ws("/ws");
 AsyncEventSource events("/events");
 
+String body; //for saving body messages
+
 //prototype
 void onWsEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len);
 
@@ -66,16 +68,30 @@ void webServer_init()
         [](AsyncWebServerRequest *request) {},
         NULL,
         [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
-            for (size_t i = 0; i < len; i++)
-            {
-                Serial.write(data[i]);
-            }
-            String body = (char *)data;
-            preparePacketForMesh(0, body);
-
-            Serial.println();
-
             request->send(200);
+            if (!index) //new body
+            {
+                body = (char *)data;
+            }
+            else
+            {
+                body = body + (char *)data;
+            }
+            if (index + len == total)
+            {
+                preparePacketForMesh(0, body);
+                body = "";
+            }
+
+            Serial.println("");
+            Serial.println("==== post req ====");
+            Serial.println("len");
+            Serial.println(len);
+            Serial.println("index");
+            Serial.println(index);
+            Serial.println("total");
+            Serial.println(total);
+            // free(data);
         });
 
     server.begin();

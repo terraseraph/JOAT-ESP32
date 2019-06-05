@@ -14,6 +14,7 @@
 #include <Update.h>
 #include <SPIFFS.h>
 #include "base64.h"
+
 #define OTA_FN "/ota_fw.json"
 
 struct firmware_ota_t
@@ -64,7 +65,9 @@ void otaReceiveUpdate(JsonObject root)
 {
     //    write data
     auto b64data = root["message"]["data"].as<std::string>();
+    Serial.println("=== Decoding base 64 ====");
     auto b64Data = base64_decode(b64data);
+    size_t outputLength;
 
     if (Update.write((uint8_t *)b64Data.c_str(),
                      b64Data.length()) != b64Data.length())

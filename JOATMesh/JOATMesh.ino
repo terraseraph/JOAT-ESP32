@@ -330,7 +330,8 @@ void preparePacketForMesh(uint32_t from, String &msg)
 {
   // Saving logServer
   Serial.println("Perparing packet");
-  DynamicJsonDocument jsonBuffer(sizeof(msg) + 100);
+  DynamicJsonDocument jsonBuffer(msg.length() + 1024);
+  Serial.println(msg.length());
   deserializeJson(jsonBuffer, msg);
   JsonObject root = jsonBuffer.as<JsonObject>();
   String buffer;
@@ -445,14 +446,15 @@ void parseReceivedPacket(uint32_t from, String msg)
 {
   Serial.println("==== parsing Received packet =======");
 
-  DynamicJsonDocument jsonBuffer(sizeof(msg) + 100);
+  DynamicJsonDocument jsonBuffer(msg.length() + 1024);
+  Serial.println(msg.length());
   // JsonObject &root = jsonBuffer.parseObject(msg);
   deserializeJson(jsonBuffer, msg);
   JsonObject root = jsonBuffer.as<JsonObject>();
   String serialBuffer;
   // root.printTo(serialBuffer);
   serializeJson(root, serialBuffer);
-  Serial.println(serialBuffer);
+  // Serial.println(serialBuffer);
   if (!root.isNull())
   {
 
