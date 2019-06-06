@@ -3,9 +3,9 @@ painlessMesh mesh; // mesh
 
 void mesh_init()
 {
-    mesh.setDebugMsgTypes(ERROR | STARTUP | CONNECTION | COMMUNICATION); // set before init() so that you can see startup messages
+    mesh.setDebugMsgTypes(ERROR | STARTUP | CONNECTION | COMMUNICATION | GENERAL | SYNC); // set before init() so that you can see startup messages
     // mesh.setDebugMsgTypes(ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE);
-    mesh.init(MESH_PREFIX, MESH_PASSWORD, MESH_PORT, WIFI_AP_STA, 6);
+    mesh.init(MESH_PREFIX, MESH_PASSWORD, MESH_PORT, WIFI_AP_STA, MESH_CHANNEL, 1, 10);
     mesh.onReceive(&mesh_receivedCallback);
     mesh.onNewConnection(&newConnectionCallback);
     mesh.setContainsRoot(true);

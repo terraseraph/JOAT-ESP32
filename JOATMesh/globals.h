@@ -1,11 +1,12 @@
 //#define ARDUINOJSON_ENABLE_PROGMEM 0
 //Global vars
-#define MESH_PREFIX "seraphimMesh"
-#define MESH_PASSWORD "somepassword"
+#define MESH_PREFIX "meshSSID"
+#define MESH_PASSWORD "meshPass"
 #define MESH_PORT 5555
+#define MESH_CHANNEL 11
 
 #define STATION_SSID "SSID"
-#define STATION_PASSWORD "somePassword"
+#define STATION_PASSWORD "Pass"
 
 #define HOSTNAME "JoatServer"
 #define MQTTENABLE
