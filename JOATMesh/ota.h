@@ -10,7 +10,7 @@
  * 
  * 
  */
-
+#define ENABLE_OTA
 #include <Update.h>
 #include <SPIFFS.h>
 #include "base64.h"

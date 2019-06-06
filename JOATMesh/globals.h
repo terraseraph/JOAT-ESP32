@@ -27,7 +27,7 @@ bool MQTT_ENABLED = true;
 bool HTTP_ENABLED = true;
 
 Scheduler scheduler; //scheduler
-painlessMesh mesh;   // mesh
+// painlessMesh mesh;   // mesh
 
 struct DEVICE
 {
@@ -49,7 +49,7 @@ void preparePacketForMesh(uint32_t from, String &msg);
 void taskPrepareMeshReconnect();
 void taskPrepareHeartbeat();
 void taskBroadcastBridgeId();
-void printNodeList();
+void printBridgeStatus();
 uint32_t getNodeHardwareId(String id);
 
 char *IPAddressToString(uint8_t ip); //webServer
@@ -59,6 +59,34 @@ void processMp3Action(String action, uint8_t folderId, uint8_t fileId); //mp3
 
 void mqttCallback(char *topic, byte *payload, unsigned int length); // mqtt
 void sendMqttPacket(String packet);                                 //mqtt
+
+void newConnectionCallback(uint32_t nodeId);            //mesh
+void mesh_receivedCallback(uint32_t from, String &msg); //mesh
+bool mesh_sendSingle(uint32_t nodeId, String msg);
+String mesh_getStationIp();
+String mesh_getNodeId();
+bool mesh_sendBroadcast(String msg);
+
+void parseReceivedPacket(uint32_t from, String msg); //main
+void printBridgeStatus();
+
+// Commands
+String cmd_create_bridgeId(uint32_t nodeId);
+void cmd_query_nodeList();
+void cmd_query_subConnections();
+void cmd_bridgeId(JsonObject cmd);
+void cmd_functionChange(JsonObject cmd);
+void cmd_admin(JsonObject cmd);
+void cmd_setId(JsonObject cmd);
+void cmd_setName(JsonObject cmd);
+void cmd_branchAddress(JsonObject cmd);
+void cmd_mqttMode(JsonObject cmd);
+bool validateFunctionChange(String msg);
+void cmd_otaUpdate(JsonObject cmd);
+String cmd_create_bridgeId(uint32_t nodeId, bool broadcast);
+
+//OTA
+void otaReceiveUpdate(JsonObject root);
 
 //Json objects
 // DynamicJsonDocument jsonNodeListBuffer(1024);

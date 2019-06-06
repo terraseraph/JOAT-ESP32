@@ -51,7 +51,18 @@ void webServer_init()
     });
 
     server.on("/nodes", HTTP_GET, [](AsyncWebServerRequest *request) {
+        SimpleList<uint32_t> nodes;
+        nodes = mesh.getNodeList();
         String list;
+        SimpleList<uint32_t>::iterator node = nodes.begin();
+        while (node != nodes.end())
+        {
+            list = list + (char)*node;
+            Serial.printf(" %u", *node);
+            node++;
+        }
+
+        // String list = (char *)mesh.getNodeList();
         // nodeList.printTo(list);
         // serializeJson(nodeList, list);
         request->send(200, "text/html", "{\"nodes\":[ " + list + "]}");

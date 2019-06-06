@@ -23,20 +23,20 @@
  */
 
 // Prototypes
-String cmd_create_bridgeId(uint32_t nodeId);
+// String cmd_create_bridgeId(uint32_t nodeId);
 
-void cmd_query_nodeList();
-void cmd_query_subConnections();
+// void cmd_query_nodeList();
+// void cmd_query_subConnections();
 
-void cmd_bridgeId(JsonObject cmd);
-void cmd_functionChange(JsonObject cmd);
-void cmd_admin(JsonObject cmd);
-void cmd_setId(JsonObject cmd);
-void cmd_setName(JsonObject cmd);
-void cmd_branchAddress(JsonObject cmd);
-void cmd_mqttMode(JsonObject cmd);
-bool validateFunctionChange(String msg);
-void cmd_otaUpdate(JsonObject cmd);
+// void cmd_bridgeId(JsonObject cmd);
+// void cmd_functionChange(JsonObject cmd);
+// void cmd_admin(JsonObject cmd);
+// void cmd_setId(JsonObject cmd);
+// void cmd_setName(JsonObject cmd);
+// void cmd_branchAddress(JsonObject cmd);
+// void cmd_mqttMode(JsonObject cmd);
+// bool validateFunctionChange(String msg);
+// void cmd_otaUpdate(JsonObject cmd);
 
 //==============================//
 //=====Parse Command ==========//
@@ -192,7 +192,7 @@ void cmd_admin(JsonObject cmd)
   String msg = cmd["message"];
   if (msg == "getMeshNodes")
   {
-    printNodeList();
+    printBridgeStatus();
     // send mesh nodes back in a packet here??!?!
   }
 }
@@ -236,7 +236,9 @@ void cmd_mqttMode(JsonObject cmd)
 
 void cmd_otaUpdate(JsonObject cmd)
 {
+#ifdef ENABLE_OTA
   otaReceiveUpdate(cmd);
+#endif
 }
 
 /**
