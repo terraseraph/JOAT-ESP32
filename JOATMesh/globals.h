@@ -1,12 +1,12 @@
 //#define ARDUINOJSON_ENABLE_PROGMEM 0
 //Global vars
-#define MESH_PREFIX "meshSSID"
-#define MESH_PASSWORD "meshPass"
+#define MESH_PREFIX "ssid"
+#define MESH_PASSWORD "pass"
 #define MESH_PORT 5555
 #define MESH_CHANNEL 11
 
-#define STATION_SSID "SSID"
-#define STATION_PASSWORD "Pass"
+#define STATION_SSID "ssid"
+#define STATION_PASSWORD "pass"
 
 #define HOSTNAME "JoatServer"
 #define MQTTENABLE
@@ -27,7 +27,7 @@ bool MQTT_ENABLED = true;
 
 bool HTTP_ENABLED = true;
 
-Scheduler scheduler; //scheduler
+// Scheduler scheduler; //scheduler
 // painlessMesh mesh;   // mesh
 
 struct DEVICE

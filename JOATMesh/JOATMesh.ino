@@ -42,13 +42,13 @@ String inputString = ""; //for serial input
 // Scheduler reconnectScheduler;
 Task taskReconnect(TASK_SECOND * 180, TASK_FOREVER, &taskPrepareMeshReconnect);
 
-// Scheduler heartbeatScheduler;
+Scheduler heartbeatScheduler;
 Task taskHeartbeat(TASK_SECOND * 30, TASK_FOREVER, &taskPrepareHeartbeat);
 
 // Scheduler nodeListScheduler;
 Task printBridgeStatusTask(TASK_SECOND * 60, TASK_FOREVER, &printBridgeStatus);
 
-// Scheduler bridgeIdScheduler;
+Scheduler bridgeIdScheduler;
 Task taskBridgeId(TASK_SECOND * 20, TASK_FOREVER, &taskBroadcastBridgeId);
 
 //==============================//
@@ -79,7 +79,7 @@ void setup()
   startupInitType();
   if (NODE_TYPE != "bridge")
   {
-    scheduler.addTask(taskHeartbeat);
+    heartbeatScheduler.addTask(taskHeartbeat);
     // scheduler.addTask(taskReconnect);
     // taskReconnect.enable();
     taskHeartbeat.enable();
@@ -134,8 +134,8 @@ void startupInitType()
   if (NODE_TYPE == "bridge")
   {
     bridge_init();
-    scheduler.addTask(printBridgeStatusTask);
-    scheduler.addTask(taskBridgeId);
+    bridgeIdScheduler.addTask(printBridgeStatusTask);
+    bridgeIdScheduler.addTask(taskBridgeId);
     printBridgeStatusTask.enable();
     taskBridgeId.enable();
   };
@@ -180,7 +180,7 @@ void processEventLoop()
   //==================================//
   if (NODE_TYPE != "bridge") //run heartbeat if not the bridge
   {
-    scheduler.execute();
+    heartbeatScheduler.execute();
     if ((millis() - bridgeLastSeen) > 1000 * 180)
     {
       ESP.restart();
@@ -192,7 +192,7 @@ void processEventLoop()
   }
   if (NODE_TYPE == "bridge") //if it is the bridge
   {
-    scheduler.execute();
+    bridgeIdScheduler.execute();
     processMqtt();
   }
 }
