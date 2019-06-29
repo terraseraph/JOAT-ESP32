@@ -81,6 +81,14 @@ void cmd_parseCommand(JsonObject root)
   {
     cmd_otaUpdate(command);
   }
+  if (command["type"] == "customPinInit")
+  {
+    cmd_customPinInit(command);
+  }
+  if (command["type"] == "customPinToggle")
+  {
+    cmd_customPinToggle(command);
+  }
 }
 
 // Parse Broadcast commands
@@ -207,6 +215,20 @@ void cmd_setId(JsonObject cmd)
 void cmd_setName(JsonObject cmd)
 {
   //nothing yet
+}
+
+void cmd_customPinInit(JsonObject cmd)
+{
+  uint8_t pin = cmd["message"]["pinNo"];
+  bool input = cmd["message"]["input"];
+  customPin_init(pin, input);
+}
+
+void cmd_customPinToggle(JsonObject cmd)
+{
+  uint8_t pin = cmd["message"]["pinNo"];
+  bool active = cmd["message"]["active"];
+  customPin_toggle(pin, active);
 }
 
 void cmd_branchAddress(JsonObject cmd)

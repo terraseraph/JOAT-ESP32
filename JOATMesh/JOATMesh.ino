@@ -32,6 +32,7 @@
 #include "rfid.h"
 //------ Custom ------//
 #include "custom/phone.h"
+#include "custom/customPinMode.h"
 
 String inputString = ""; //for serial input
 
@@ -60,11 +61,6 @@ bool bridgeConnected = false;
 void setup()
 {
   Serial.begin(115200);
-  // mesh.setDebugMsgTypes(ERROR | STARTUP | CONNECTION | COMMUNICATION); // set before init() so that you can see startup messages
-  // // mesh.setDebugMsgTypes(ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE);
-  // mesh.init(MESH_PREFIX, MESH_PASSWORD, MESH_PORT, WIFI_AP_STA, 6);
-  // mesh.onReceive(&mesh_receivedCallback);
-  // mesh.onNewConnection(&newConnectionCallback);
   mesh_init();
 
   if (getMyId() != "0")

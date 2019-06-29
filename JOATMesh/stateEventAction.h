@@ -76,6 +76,11 @@ void state_parsePacket(JsonObject root)
   {
     Serial.println("Packet for me");
     Serial.println(state_message_actionType);
+    if (strcmp(state_message_actionType, "customPin") == 0)
+    {
+      uint8_t pinNo = root["state"]["message"]["data"];
+      processCustomPinAction(pinNo, state_message_action);
+    }
     if (strcmp(state_message_actionType, "relay") == 0)
     {
       int data = root["state"]["message"]["data"];
@@ -83,14 +88,6 @@ void state_parsePacket(JsonObject root)
     }
     else if (strcmp(state_message_actionType, "mp3") == 0)
     {
-      // String pData = root["state"]["message"]["data"];
-      // DynamicJsonDocument jsonObject(1024);
-      // deserializeJson(jsonObject, pData);
-      // JsonObject dat = jsonObject.as<JsonObject>();
-
-      // JsonArray datArray = root["state"]["message"]["data"];
-
-      // JsonObject dat = tempBuffer.parseObject(pData);
       uint8_t invalid = -1;
       String action = root["state"]["message"]["action"];
 

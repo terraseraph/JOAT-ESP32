@@ -1,6 +1,6 @@
 //#define ARDUINOJSON_ENABLE_PROGMEM 0
 //Global vars
-#define MESH_PREFIX "ssid"
+#define MESH_PREFIX "meshssid"
 #define MESH_PASSWORD "pass"
 #define MESH_PORT 5555
 #define MESH_CHANNEL 11
@@ -85,14 +85,16 @@ void cmd_mqttMode(JsonObject cmd);
 bool validateFunctionChange(String msg);
 void cmd_otaUpdate(JsonObject cmd);
 String cmd_create_bridgeId(uint32_t nodeId, bool broadcast);
+void cmd_customPinInit(JsonObject cmd);
+void cmd_customPinToggle(JsonObject cmd);
 
 //OTA
 void otaReceiveUpdate(JsonObject root);
 
-//Json objects
-// DynamicJsonDocument jsonNodeListBuffer(1024);
-// DynamicJsonDocument nodeList(1024);
-// JsonObject &nodeList = jsonNodeListBuffer.createObject();
+// Custom pins
+void customPin_init(uint8_t pinNo, bool input);            //command
+void customPin_toggle(uint8_t pinNo, bool active);         //command
+void processCustomPinAction(uint8_t pinNo, String action); //EventAction
 
 char *getMyIdChar()
 {
