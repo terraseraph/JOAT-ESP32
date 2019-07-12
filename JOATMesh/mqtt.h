@@ -60,7 +60,10 @@ void sendMqttPacket(String packet)
 {
     if (!mqttClient.connected())
     {
-        return;
+        if (WiFi.isConnected())
+        {
+            xTimerStart(mqttReconnectTimer, 0);
+        }
     }
 
     char *pkt = const_cast<char *>(packet.c_str());

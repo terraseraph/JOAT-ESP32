@@ -3,7 +3,7 @@ painlessMesh mesh; // mesh
 
 void mesh_init()
 {
-    mesh.setDebugMsgTypes(ERROR | STARTUP | CONNECTION); // set before init() so that you can see startup messages
+    mesh.setDebugMsgTypes(ERROR | STARTUP); // set before init() so that you can see startup messages
     // mesh.setDebugMsgTypes(ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE);
     mesh.init(MESH_PREFIX, MESH_PASSWORD, MESH_PORT, WIFI_AP_STA, MESH_CHANNEL, 0, 10);
     mesh.onReceive(&mesh_receivedCallback);
