@@ -75,5 +75,5 @@ bool mesh_sendBroadcast(String msg)
 void mesh_restartMesh()
 {
     mesh.stop();
-    mesh.init(MESH_PREFIX, MESH_PASSWORD, MESH_PORT, WIFI_AP_STA, 6);
+    mesh_init();
 }

@@ -181,6 +181,12 @@ void processEventLoop()
     {
       ESP.restart();
     }
+
+    if ((millis() - bridgeLastSeen) > 1000 * 60)
+    {
+      mesh_restartMesh();
+    }
+
     if (bridgeConnected)
     {
       bridgeLastSeen = millis();
