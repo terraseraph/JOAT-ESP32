@@ -188,6 +188,7 @@ void processEventLoop()
       mesh_restartMesh();
       bridgeLastSeenForReset = millis();
     }
+
     if (bridgeConnected)
     {
       bridgeLastSeen = millis();
