@@ -1,5 +1,6 @@
 
 painlessMesh mesh; // mesh
+long mesh_reconnectTime;
 
 void mesh_init()
 {

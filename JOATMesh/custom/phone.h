@@ -24,11 +24,14 @@ char phoneKeys[PHONE_KEYPAD_ROWS][PHONE_KEYPAD_COLS] = {
 byte PHONE_KEYPAD_ROW_PINS[] = {LEFT_PIN1, LEFT_PIN2, LEFT_PIN3, LEFT_PIN4};
 byte PHONE_KEYPAD_COL_PINS[] = {LEFT_PIN5, LEFT_PIN6, LEFT_PIN7};
 
+Bounce phone_hookReed = Bounce(); 
+
 void phone_init()
 {
 
     pinMode(HOOK_SWITCH, INPUT_PULLUP);
-
+	phone_hookReed.attach(HOOK_SWITCH);
+	phone_hookReed.interval(100);
     KEYPAD_DIGITS = PHONE_KEYPAD_DIGITS;
     keypad_custom_init(makeKeymap(phoneKeys), PHONE_KEYPAD_ROW_PINS, PHONE_KEYPAD_COL_PINS, sizeof(PHONE_KEYPAD_ROW_PINS), sizeof(PHONE_KEYPAD_COL_PINS));
     // _keypad = new Keypad(makeKeymap(phoneKeys), PHONE_KEYPAD_ROW_PINS, PHONE_KEYPAD_COL_PINS, sizeof(PHONE_KEYPAD_ROW_PINS), sizeof(PHONE_KEYPAD_COL_PINS));
@@ -45,9 +48,11 @@ bool processPhoneLoop()
     //     playPhoneTone();
     // };
     processMp3Loop();
-
+	phone_hookReed.update();
+	int reedValue = phone_hookReed.read();
     // Process hook magnet
-    if (digitalRead(HOOK_SWITCH) == LOW)
+    //if (digitalRead(HOOK_SWITCH) == LOW)
+	if(reedValue == LOW)
     {
         if (onHook)
         { //if the phone was just picked up

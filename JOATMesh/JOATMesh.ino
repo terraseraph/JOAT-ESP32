@@ -15,6 +15,7 @@
 
 #include <painlessMesh.h>
 #include <HardwareSerial.h>
+#include <Bounce2.h>
 #include "ota.h"
 #include "libs/LinkedList.h"
 #include "globals.h"
@@ -56,6 +57,7 @@ Task taskBridgeId(TASK_SECOND * 20, TASK_FOREVER, &taskBroadcastBridgeId);
 //===== Setup =================//
 //============================//
 long bridgeLastSeen = 0;
+long bridgeLastSeenForReset = 0;
 bool bridgeConnected = false;
 
 void setup()
@@ -181,15 +183,16 @@ void processEventLoop()
     {
       ESP.restart();
     }
-
-    if ((millis() - bridgeLastSeen) > 1000 * 60)
+    if ((millis() - bridgeLastSeenForReset) > 1000 * 60)
     {
       mesh_restartMesh();
+      bridgeLastSeenForReset = millis();
     }
 
     if (bridgeConnected)
     {
       bridgeLastSeen = millis();
+      bridgeLastSeenForReset = millis();
     }
   }
   if (NODE_TYPE == "bridge") //if it is the bridge

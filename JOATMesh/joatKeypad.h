@@ -19,7 +19,7 @@
 /////////////////////////////////
 // BUZZER
 /////////////////////////////////
-#define BUZZER_PIN 35
+#define BUZZER_PIN 21
 
 //Prototypes
 bool ProcessKeyPad();
@@ -35,7 +35,7 @@ void keypad_resetDigits();
 uint8_t keypad_getDigitCount();
 bool keypad_hasMessageSent();
 
-int KEYPAD_DIGITS = 6; //Amount of digits till it sends packet
+int KEYPAD_DIGITS = 4; //Amount of digits till it sends packet
 int keypad_timeout;
 int keypad_last_keypress;
 uint8_t keypad_pressed_key;
@@ -145,13 +145,13 @@ bool ProcessKeyPad()
       keypad_resetDigits();
       playTimeoutSound = false;
       // ledcWriteTone(channel, 3000);
-      ledcWriteNote(channel, NOTE_A, 3);
+      ledcWriteNote(channel, NOTE_F, 5);
       buzzerDebounce = millis();
     }
     else
     {
       // ledcWriteTone(channel, 1000);
-      ledcWriteNote(channel, NOTE_A, 1);
+      ledcWriteNote(channel, NOTE_A, 7);
       buzzerDebounce = millis();
     }
     return true;
@@ -166,7 +166,7 @@ bool ProcessKeyPad()
     {
       // ledcWriteTone(channel, 5000);
       Serial.println("== playing timeout sound ===");
-      ledcWriteNote(channel, NOTE_A, 6);
+      ledcWriteNote(channel, NOTE_C, 6);
       buzzerDebounce = millis();
       playTimeoutSound = false;
     }

@@ -1,3 +1,5 @@
+//bounce2
+#define REED_INPUTS 10
 
 /////////////////////////////
 // Magnet switch pins
@@ -13,26 +15,41 @@
 #define MAG_PIN8 19
 #define MAG_PIN9 21
 
+bool reed_updateBounce();
 String intToStringArray(int int_array[], int size_of_array);
 bool SWITCH_STATE[] = {false, false, false, false, false, false, false, false, false, false};
 long reedDebounceTime;
 bool reedDebounceBool = false;
+int reed_pinData[10] = {0};
+
+//bounce2
+const uint8_t REED_PINS[REED_INPUTS] = {MAG_PIN0, MAG_PIN1, MAG_PIN2, MAG_PIN3, MAG_PIN4, MAG_PIN5, MAG_PIN6, MAG_PIN7, MAG_PIN8, MAG_PIN9};
+Bounce * reed_inputs = new Bounce[REED_INPUTS];
 
 void magSwitch_init()
 {
-  pinMode(MAG_PIN0, INPUT_PULLUP);
-  pinMode(MAG_PIN1, INPUT_PULLUP);
-  pinMode(MAG_PIN2, INPUT_PULLUP);
-  pinMode(MAG_PIN3, INPUT_PULLUP);
-  pinMode(MAG_PIN4, INPUT_PULLUP);
-  pinMode(MAG_PIN5, INPUT_PULLUP);
-  pinMode(MAG_PIN6, INPUT_PULLUP);
-  pinMode(MAG_PIN7, INPUT_PULLUP);
-  pinMode(MAG_PIN8, INPUT_PULLUP);
-  pinMode(MAG_PIN9, INPUT_PULLUP);
+//  pinMode(MAG_PIN0, INPUT_PULLUP);
+//  pinMode(MAG_PIN1, INPUT_PULLUP);
+//  pinMode(MAG_PIN2, INPUT_PULLUP);
+//  pinMode(MAG_PIN3, INPUT_PULLUP);
+//  pinMode(MAG_PIN4, INPUT_PULLUP);
+//  pinMode(MAG_PIN5, INPUT_PULLUP);
+//  pinMode(MAG_PIN6, INPUT_PULLUP);
+//  pinMode(MAG_PIN7, INPUT_PULLUP);
+//  pinMode(MAG_PIN8, INPUT_PULLUP);
+//  pinMode(MAG_PIN9, INPUT_PULLUP);
 
   NODE_TYPE = "magSwitch";
+
+  for (int i = 0; i < REED_INPUTS; i++) {
+    reed_inputs[i].attach( REED_PINS[i] , INPUT_PULLUP  );       //setup the bounce instance for the current button
+    reed_inputs[i].interval(100);              // interval in ms
+  }
+
+  
 }
+
+
 
 void processMagSwitchEvent()
 {
@@ -48,6 +65,22 @@ void processMagSwitchEvent()
       reedDebounceBool = false;
     }
   }
+
+  //bounce2
+  if(!reed_updateBounce()){
+    return;
+  }
+  int switchNo = 10; //was -1
+  for (int i = 0; i < REED_INPUTS; i++)  {
+    if(reed_inputs[i].read() == LOW){
+      reed_pinData[i] = 1;   
+    }
+    else{
+      reed_pinData[i] = 0;   
+    }
+    
+  }
+  
   int magnet0 = digitalRead(MAG_PIN0);
   int magnet1 = digitalRead(MAG_PIN1);
   int magnet2 = digitalRead(MAG_PIN2);
@@ -58,7 +91,7 @@ void processMagSwitchEvent()
   int magnet7 = digitalRead(MAG_PIN7);
   int magnet8 = digitalRead(MAG_PIN8);
   int magnet9 = digitalRead(MAG_PIN9);
-  int switchNo = -1;
+  
 
   // LOW is on
   if (magnet0 == LOW && !SWITCH_STATE[0] || magnet0 == HIGH && SWITCH_STATE[0])
@@ -119,12 +152,25 @@ void processMagSwitchEvent()
       int_data[8] = 1;
     if (magnet9 == LOW)
       int_data[9] = 1;
-    String str_data = intToStringArray(int_data, 10);
-
+//    String str_data = intToStringArray(int_data, 10);
+    String str_data = intToStringArray(reed_pinData, 10);
+    Serial.println(str_data);
+    
     reedDebounceBool = true;
     reedDebounceTime = millis();
     state_createAndSendPacket(MY_ID, "event", "toggle", "magnetSwitch", "noneA", "noneAT", str_data);
   }
+}
+
+
+bool reed_updateBounce(){
+  bool hasToggled = false;
+  for (int i = 0; i < REED_INPUTS; i++)  {
+    if(reed_inputs[i].update()){
+      hasToggled = true;
+    }
+  }
+  return hasToggled;
 }
 
 String intToStringArray(int int_array[], int size_of_array)

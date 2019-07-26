@@ -3,10 +3,10 @@
 #define MESH_PREFIX "meshSSID"
 #define MESH_PASSWORD "meshPass"
 #define MESH_PORT 5555
-#define MESH_CHANNEL 11
+#define MESH_CHANNEL 6
 
-#define STATION_SSID "wifiSSID"
-#define STATION_PASSWORD "wifiPass"
+#define STATION_SSID "SSID"
+#define STATION_PASSWORD "pass"
 
 #define HOSTNAME "JoatServer"
 #define MQTTENABLE
